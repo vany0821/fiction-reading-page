@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>恶意 — 书籍信息 · Chapter Café</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ========== 来自 index0.html 的全局视觉与头部样式（保留站点外观） ========== */
+    :root {
+      --coffee-deep: #3e2723;
+      --milk-white: #f9f5f0;
+      --amber-gold: #ffbe76;
+      --night-blue: #22314a;
+      --soft-shadow: 0 6px 32px 0 rgba(34, 49, 74, 0.18);
+      --card-radius: 1.3rem;
+      --text-typer: 'Courier New', Courier, monospace;
+      --text-sans: 'Poppins', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --header-height: 64px;
+      --header-height-mobile: 54px;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background:
+        linear-gradient(rgba(40, 25, 15, 0.68), rgba(34, 49, 74, 0.82)),
+        url('https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=1950&q=80');
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      font-family: var(--text-sans);
+      color: var(--milk-white);
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+    body::after {
+      content: '';
+      display: block;
+      position: fixed; z-index: -1; inset: 0;
+      background:
+        radial-gradient(circle at 60% 19%, rgba(255,190,118,0.09) 0, transparent 70%),
+        radial-gradient(circle at 26% 86%, rgba(244,229,196, 0.13) 0, transparent 57%);
+      pointer-events: none;
+      mix-blend-mode: lighten;
+    }
+
+    /* header / nav (来自 index0.html) */
+    header {
+      width: 100vw;
+      padding: 0;
+      background: rgba(34,49,74,0.84);
+      box-shadow: 0 1px 18px 0 rgba(34,49,74,0.07);
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: var(--header-height);
+      transition: height .23s;
+    }
+    .nav-inner {
+      width: 100%;
+      max-width: 1340px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.2rem;
+      height: 100%;
+    }
+    .logo {
+      font-family: var(--text-typer);
+      font-size: 2.0rem;
+      color: var(--amber-gold);
+      user-select: none;
+      letter-spacing: .05em;
+      display: flex; align-items: center;
+      text-shadow: 1px 4px 16px rgba(255,190,118,0.18);
+    }
+    nav {
+      display: flex;
+      gap: 1.36rem;
+      align-items: center;
+      transition: none;
+    }
+    .nav-link {
+      font-size: 1.14rem;
+      color: var(--milk-white);
+      font-family: var(--text-sans);
+      letter-spacing: 0.035em;
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      padding: 0.38em 0.7em;
+      transition: color .22s;
+      outline: none;
+    }
+    .nav-link:hover, .nav-link:focus { color: var(--amber-gold); }
+    .nav-hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.3rem;
+      margin-left: 2rem;
+      outline: none;
+      z-index: 130;
+    }
+    .nav-hamburger span, .nav-hamburger span::before, .nav-hamburger span::after {
+      display: block;
+      background: var(--amber-gold);
+      height: 3.4px;
+      border-radius: 3px;
+      width: 28px;
+      transition: all .24s;
+      position: relative;
+    }
+    .nav-hamburger span { position: relative; margin: .38em 0; }
+    .nav-hamburger span::before { content: ''; position: absolute; left:0; top:-9px; width:100%; }
+    .nav-hamburger span::after  { content: ''; position: absolute; left:0; top:9px; width:100%; }
+
+    @media (max-width: 900px) {
+      header { height: var(--header-height-mobile); }
+      .nav-inner { padding: 0 1.1rem; }
+      nav { display: none; position: absolute; top: var(--header-height-mobile); right: 0; background: rgba(34,49,74,0.97); flex-direction: column; align-items: flex-end; min-width: 170px; width: 46vw; max-width: 220px; box-shadow: -2px 8px 32px #00000044; border-bottom-left-radius: 16px; z-index: 110; }
+      nav.open { display: flex; animation: fadein-right .27s; }
+      .nav-hamburger { display: block; }
+    }
+    @keyframes fadein-right { from { opacity: 0; transform: translateX(60px);} to { opacity: 1; transform: translateX(0);} }
+
+    /* 把应用页面主要容器往下移，避免被固定头部遮挡 */
+    .page-wrap {
+      max-width: 980px;
+      margin: 92px auto 40px; /* top 留出头部高度 (64) + 空白 */
+      padding: 0 20px;
+    }
+
+    /* ========== 原 murder 页面局部样式（保持不变，仅微调间距） ========== */
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:12px;padding:18px;box-shadow:0 8px 36px rgba(0,0,0,0.45);}
+    .grid{display:grid;grid-template-columns:160px 1fr;gap:18px;align-items:start;}
+    .cover{width:160px;height:220px;border-radius:8px;background-size:cover;background-position:center;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+    .meta {color:#ffdca8;font-weight:600;margin-bottom:10px;}
+    .info-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px;}
+    .btn{display:inline-block;background:linear-gradient(90deg,var(--amber-gold),#fad096);color:#2b160f;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:700;}
+    h1{margin:0 0 6px 0;color:var(--amber-gold);font-size:1.6rem;}
+    h2{margin-top:0;color:#ffdca8;}
+    .section{margin-top:18px;}
+    .toc{display:block;padding:12px 16px;border-radius:10px;background:rgba(255,255,255,0.02);line-height:1.7;}
+    /* 目录链接颜色与周围文字一致（白色），悬停变金色提示 */
+    .toc a { color: var(--milk-white); text-decoration: none; }
+    .toc a:hover, .toc a:focus { color: var(--amber-gold); text-decoration: underline; }
+    .toc li{margin:6px 0;}
+
+    @media (max-width:700px){
+      .grid{grid-template-columns:1fr;grid-auto-rows:auto;}
+      .cover{width:36vw;height:52vw;margin:0 auto;}
+    }
+
+    /* footer 样式（来自 index0.html） */
+    footer {
+      margin-top: 2.6rem;
+      width: 100%;
+      padding: 1.6rem 1.2rem;
+      background: rgba(31, 20, 15, 0.92);
+      color: var(--amber-gold);
+      font-family: var(--text-typer);
+      font-size: 0.98rem;
+      text-align: center;
+      letter-spacing: .07em;
+      position: relative;
+      z-index: 20;
+      border-radius: 8px;
+    }
+
+    /* 小屏时让页面顶部留白更合适 */
+    @media (max-width:900px) {
+      .page-wrap { margin-top: 78px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 复制主页面头部结构（但将原来通过 JS 控制的按钮替换为普通链接，指回 index0.html） -->
+  <header>
+    <div class="nav-inner">
+      <div class="logo">Chapter Café</div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="菜单">
+        <span></span>
+      </button>
+      <nav id="mainNav">
+        <a class="nav-link" href="index0.html#home">Home</a>
+        <a class="nav-link" href="index0.html#menu">Menu</a>
+        <a class="nav-link" href="index0.html#reading">Reading</a>
+        <a class="nav-link" href="index0.html#about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 页面主体：保留原有书籍内容，仅把外层容器替换为 .page-wrap 来配合顶部样式 -->
+  <div class="page-wrap">
+    <!-- 原来 wrap 内的内容（保持完全不变） -->
+    <div class="wrap">
+      <div class="card">
+        <div class="grid">
+          <div class="cover" style="background-image:url('https://cdn.weread.qq.com/weread/cover/29/3300020529/t6_3300020529.jpg');"></div>
+          <div>
+            <h1>恶意</h1>
+            <div class="meta">作者：东野圭吾  |  出版：新经典文化出版社（2022年1月）</div>
+            <div style="margin-bottom:10px;color:#e9e9e9;">
+              <div class="info-row"><div>字数：11.6万字</div><div>预计阅读时长：6小时25分钟</div></div>
+              <p style="margin-top:6px;color:#f1ead6;">赌上全部人生也要贯彻到底的恶意，究竟从何而来？</p>
+              <div style="margin-top:12px;">
+                <!-- 修改：直接跳转到阅读界面的恶意第1章 -->
+                <a class="btn" href="index0.html#reading-malice-chapter1" title="开始阅读第1章">开始阅读</a>
+                 <a class="btn" style="margin-left:12px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--milk-white);" href="index0.html#menu">返回菜单</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section card" style="margin-top:18px;">
+        <h2>作者信息</h2>
+        <div style="color:#e9e9e9;line-height:1.8;">
+          <strong>东野圭吾</strong>（东野圭吾，日本著名作家。1958年生于大阪。1985年，以第31届江户川乱步奖获奖作品《放学后》出道，开始扬名立万。20年作品逾60部，几乎囊括了日本所有大奖，1998年，《秘密》获第52届日本推理作家协会奖，入围第120届直木奖；1999年，《白夜行》入围第122届直木奖；2001年，《暗恋》入围第125届直木奖；2003年，《信》入围第129届直木奖。2006年，《嫌疑人X的献身》终于捧得日本文学最高荣誉直木奖。
+
+前期作品多写得精巧细致，随着写作功底浸润日深，尤其是《白夜行》之后，笔锋日渐老辣：文字鲜加雕琢，叙述简练凶狠，情节跌宕诡异，故事架构几至匪夷所思的地步。至巅峰之作《嫌疑人X的献身》，叙事与推理，均已炉火纯青：最好的诡计、无懈可击的推理、恰当的伏笔，以及最普通但最不易猜透的悬念，受到大奖评委的莫大青睐，同时获得直木奖和本格推理小说大奖，更受到评论界、媒体和广大读者的如潮好评，创造了日本推理小说史上绝无仅有的奇迹——同时摘得“这本小说了不起”、“本格推理小说Top 10”、“周刊文艺推理小说Top 10”三大推理小说排行榜年度总冠军。
+        </div>
+      </div>
+
+      <div class="section card" style="margin-top:18px;">
+        <h2>目录</h2>
+        <div class="toc" role="list">
+            事件之章 · 野野口修的手记
+            <li><a href="index0.html#reading-malice-chapter1">卷一</a></li>
+            <li><a href="index0.html#reading-malice-chapter2">卷二</a></li>
+            <li><a href="index0.html#reading-malice-chapter3">卷三</a></li>
+            <li><a href="index0.html#reading-malice-chapter4">卷四</a></li>
+            <li><a href="index0.html#reading-malice-chapter5">卷五</a></li>
+            <li><a href="index0.html#reading-malice-chapter6">卷六</a></li>
+            <li><a href="index0.html#reading-malice-chapter7">疑惑之章 加贺恭一郎的记录</a></li>
+            <li><a href="index0.html#reading-malice-chapter8">解决之章 野野口修的手记</a></li>
+            <li><a href="index0.html#reading-malice-chapter9">求索之章 加贺恭一郎的独白</a></li>
+            <li><a href="index0.html#reading-malice-chapter10">告白之章 野野口修的手记</a></li>
+            <li><a href="index0.html#reading-malice-chapter11">过去之章（一）加贺恭一郎的记录</a></li>
+            过去之章（二）认识他们的人这样说
+            <li><a href="index0.html#reading-malice-chapter12">据林田顺一说</a></li>
+            <li><a href="index0.html#reading-malice-chapter13">据新田治美说</a></li>
+            <li><a href="index0.html#reading-malice-chapter14">据元谷雅俊说</a></li>
+            <li><a href="index0.html#reading-malice-chapter15">据广泽智代说</a></li>
+            <li><a href="index0.html#reading-malice-chapter16">据松岛行男说</a></li>
+            <li><a href="index0.html#reading-malice-chapter17">据高桥顺次说</a></li>
+            <li><a href="index0.html#reading-malice-chapter18">据三谷宏一说</a></li>
+            <li><a href="index0.html#reading-malice-chapter19">据藤村康志说</a></li>
+            <li><a href="index0.html#reading-malice-chapter20">据中冢昭夫说</a></li>
+            <li><a href="index0.html#reading-malice-chapter21">据辻村平吉说</a></li>
+            <li><a href="index0.html#reading-malice-chapter22">过去之章（三）加贺恭一郎的回忆</a></li>
+            <li><a href="index0.html#reading-malice-chapter23">真相之章 加贺恭一郎的阐明</a></li>
+        </div>
+      </div>
+
+      <div style="margin:20px 0;text-align:center;color:#a9b9c8;font-size:.95rem;">
+        © Chapter Café · 本页仅供演示书籍信息与目录展示
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚（来自主站） -->
+  <footer>
+    <div>故事，是另一种形式的咖啡因。</div>
+    <div style="margin-top:0.6rem;">
+      <a style="color:var(--amber-gold);margin:0 0.6rem;text-decoration:none;">🌐</a>
+      <a style="color:var(--amber-gold);margin:0 0.6rem;text-decoration:none;">📝</a>
+      <a style="color:var(--amber-gold);margin:0 0.6rem;text-decoration:none;">🎵</a>
+      <a style="color:var(--amber-gold);margin:0 0.6rem;text-decoration:none;">📧</a>
+    </div>
+    <div style="margin-top:0.3rem;color:#f9f5f080;font-family:var(--text-sans);font-size:0.9rem;">
+      © 2025 Chapter Café · Powered by Story and Coffee.
+    </div>
+  </footer>
+
+  <!-- 简单脚本：汉堡菜单开关（与主站行为一致） -->
+  <script>
+    (function(){
+      const nav = document.getElementById('mainNav');
+      const hamburger = document.getElementById('navHamburger');
+      if (hamburger && nav) {
+        hamburger.addEventListener('click', () => nav.classList.toggle('open'));
+        window.addEventListener('click', (e) => {
+          if (window.innerWidth <= 900) {
+            if (!nav.contains(e.target) && !hamburger.contains(e.target)) nav.classList.remove('open');
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

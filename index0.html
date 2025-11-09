@@ -1,0 +1,2784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Chapter Café - 阅读如品咖啡</title>
+  <!-- 字体引入 -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /************ 颜色、全局变量 ************/
+    :root {
+      --coffee-deep: #3e2723;
+      --milk-white: #f9f5f0;
+      --amber-gold: #ffbe76;
+      --night-blue: #22314a;
+      --soft-shadow: 0 6px 32px 0 rgba(34, 49, 74, 0.18);
+      --card-radius: 1.3rem;
+      --card-glow: 0 0 24px 12px rgba(255,190,118,0.12);
+      --text-typer: 'Courier New', Courier, monospace;
+      --text-sans: 'Poppins', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --header-height: 64px;
+      --header-height-mobile: 54px;
+      --section-gap: 40px;
+      --transition-fast: 0.32s cubic-bezier(.25,.8,.24,1.1);
+      --transition-slow: 0.7s cubic-bezier(.22,.7,.36,1.08);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background:
+        linear-gradient(rgba(40, 25, 15, 0.68), rgba(34, 49, 74, 0.82)),
+        url('https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=1950&q=80');
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      min-width: 100vw;
+      width: 100vw;
+      height: 100vh;
+      font-family: var(--text-sans);
+      color: var(--milk-white);
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+    body::after {
+      content: '';
+      display: block;
+      position: fixed; z-index: -1; inset: 0;
+      background:
+        radial-gradient(circle at 60% 19%, rgba(255,190,118,0.09) 0, transparent 70%),
+        radial-gradient(circle at 26% 86%, rgba(244,229,196, 0.13) 0, transparent 57%);
+      pointer-events: none;
+      mix-blend-mode: lighten;
+    }
+    main {
+      width: 100vw;
+      min-height: calc(100vh - 160px);
+    }
+
+    /* =========== 响应式顶部导航（含移动端菜单） =========== */
+    header {
+      width: 100vw;
+      padding: 0;
+      background: rgba(34,49,74,0.84);
+      box-shadow: 0 1px 18px 0 rgba(34,49,74,0.07);
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: var(--header-height);
+      transition: height .23s;
+    }
+    .nav-inner {
+      width: 100%;
+      max-width: 1340px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.2rem;
+      height: 100%;
+    }
+    .logo {
+      font-family: var(--text-typer);
+      font-size: 2.0rem;
+      color: var(--amber-gold);
+      user-select: none;
+      letter-spacing: .05em;
+      display: flex; align-items: center;
+      text-shadow: 1px 4px 16px rgba(255,190,118,0.18);
+    }
+    nav {
+      display: flex;
+      gap: 1.36rem;
+      align-items: center;
+      transition: none;
+    }
+
+    .nav-link, .nav-link-mobile {
+      font-size: 1.14rem;
+      color: var(--milk-white);
+      font-family: var(--text-sans);
+      letter-spacing: 0.035em;
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      padding: 0.38em 0.7em;
+      transition: color .22s;
+      outline: none;
+    }
+    .nav-link::after {
+      content: "";
+      display: block;
+      width: 0;
+      height: 2px;
+      background: var(--amber-gold);
+      border-radius: 1px;
+      transition: width .28s;
+      margin-top: 4px;
+      position: absolute;
+      left: 12%;
+    }
+    .nav-link.active, .nav-link:hover, .nav-link:focus {
+      color: var(--amber-gold);
+    }
+    .nav-link.active::after,
+    .nav-link:hover::after { width: 76%; }
+
+    /* 汉堡菜单按钮 */
+    .nav-hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.3rem;
+      margin-left: 2rem;
+      outline: none;
+      z-index: 130;
+    }
+    .nav-hamburger span, .nav-hamburger span::before, .nav-hamburger span::after {
+      display: block;
+      background: var(--amber-gold);
+      height: 3.4px;
+      border-radius: 3px;
+      width: 28px;
+      transition: all .24s;
+      position: relative;
+    }
+    .nav-hamburger span {
+      position: relative;
+      margin: .38em 0;
+    }
+    .nav-hamburger span::before,
+    .nav-hamburger span::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 100%;
+    }
+    .nav-hamburger span::before {
+      top: -9px;
+    }
+    .nav-hamburger span::after {
+      top: 9px;
+    }
+
+    /* 响应式适配：平板与下折叠为汉堡菜单 */
+    @media (max-width: 900px) {
+      header {
+        height: var(--header-height-mobile);
+      }
+      .nav-inner {
+        padding: 0 1.1rem;
+      }
+      nav {
+        display: none;
+        position: absolute;
+        top: var(--header-height-mobile);
+        right: 0;
+        background: rgba(34,49,74,0.97);
+        flex-direction: column;
+        align-items: flex-end;
+        min-width: 170px;
+        width: 46vw;
+        max-width: 220px;
+        box-shadow: -2px 8px 32px #00000044;
+        border-bottom-left-radius: 16px;
+        z-index: 110;
+      }
+      nav.open {
+        display: flex;
+        animation: fadein-right .27s;
+      }
+      @keyframes fadein-right {
+        from { opacity: 0; transform: translateX(60px);}
+        to   { opacity: 1; transform: translateX(0);}
+      }
+      .nav-hamburger { display: block; }
+    }
+    /* 横屏非常小设备菜单多行排列兼容 */
+    @media (max-width:520px) {
+      nav { width: 100vw; min-width: 0; right: -7%; }
+    }
+
+    /* ============= 板块内容间距 & 响应式排版 ============= */
+    .section {
+      min-height: 74vh;
+      width: 100vw;
+      margin: 0 auto;
+      padding: calc(var(--header-height) + var(--section-gap)) 0 var(--section-gap) 0;
+      display: none;
+      opacity: 0;
+      transition: opacity var(--transition-fast) .02s;
+      position: relative;
+      z-index: 20;
+    }
+    .section.active {
+      display: block;
+      opacity: 1;
+      animation: fadein-slow .77s;
+    }
+    @keyframes fadein-slow {
+      from { opacity:0; filter: blur(21px); }
+      to   { opacity:1; filter: blur(0);}
+    }
+    @media (max-width:900px) {
+      .section { padding-top: calc(var(--header-height-mobile) + 22px); }
+    }
+
+    /* === 首页主视觉区域 Hero Section === */
+    .hero-title {
+      font-size: 3.13rem;
+      letter-spacing: .065em;
+      font-family: var(--text-typer);
+      color: var(--amber-gold);
+      margin-bottom: 1.08rem;
+      text-align: center;
+      text-shadow: 0 4px 32px #44301960;
+      opacity: 0;
+      animation: fadein-up 0.95s 0.12s forwards;
+    }
+    .hero-subtitle {
+      font-size: 1.45rem;
+      letter-spacing: .08em;
+      font-family: var(--text-sans);
+      color: var(--milk-white);
+      opacity: 0;
+      margin-bottom: 2.3rem;
+      text-align: center;
+      animation: fadein-up 1.1s 0.32s forwards;
+    }
+    .enter-btn {
+      font-family: var(--text-sans);
+      font-size: 1.19rem;
+      background: linear-gradient(90deg, var(--amber-gold) 60%, #fad096 100%);
+      color: var(--coffee-deep);
+      border: none;
+      border-radius: 2.2rem;
+      padding: 0.79rem 2.2rem;
+      margin-top: 2.6rem;
+      margin-bottom: 18px;
+      cursor: pointer;
+      letter-spacing: 0.07em;
+      box-shadow: 0 1px 16px 0 #ffe5b680;
+      outline: none;
+      opacity: 0;
+      transform: translateY(26px);
+      transition: box-shadow .24s, transform .19s;
+      animation: fadein-up 1.15s 0.62s forwards;
+      position: relative;
+      overflow: hidden;
+    }
+    .enter-btn:hover,
+    .enter-btn:focus {
+      box-shadow: 0 2px 24px 0 #ffe5b6d5;
+      transform: translateY(-5px) scale(1.045);
+    }
+    @keyframes fadein-up {
+      0% { opacity:0; transform: translateY(29px);}
+      100% { opacity:1; transform: translateY(0);}
+    }
+    /* 响应式Hero字体 */
+    @media (max-width:600px) {
+      .hero-title { font-size: 2.02rem; }
+      .hero-subtitle { font-size: 1.12rem; }
+      .enter-btn, .back-btn {
+        font-size: .99rem; padding: 0.6rem 1.3rem;
+      }
+    }
+
+    /* === 咖啡卡片菜单 Coffee Menu === */
+    .coffee-list {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(160px, 1fr));
+      gap: 2.1rem;
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 1.4rem 1.1rem 1.2rem 1.1rem;
+      justify-content: center;
+    }
+    @media (max-width:1100px) {
+      .coffee-list { grid-template-columns: repeat(3, 1fr);}
+    }
+    @media (max-width:700px) {
+      .coffee-list { grid-template-columns: repeat(2, 1fr);}
+    }
+    @media (max-width:480px) {
+      .coffee-list { grid-template-columns: 1fr;}
+    }
+
+    .coffee-card {
+      background: linear-gradient(132deg, #4b3621 64%, var(--night-blue) 100%);
+      border-radius: var(--card-radius);
+      box-shadow: var(--soft-shadow);
+      margin-top: 0.2rem;
+      padding: 2rem 1.25rem 1.6rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.37s cubic-bezier(.19,.7,.43,1.4), box-shadow .27s;
+      position: relative;
+      overflow: visible;
+      z-index: 1;
+      opacity: 0.96;
+      min-width: 0; /*防止内容溢出*/
+    }
+    .coffee-card:hover, .coffee-card:focus {
+      transform: translateY(-18px) scale(1.04);
+      box-shadow:
+        0 2px 32px 0 #ffbe7644,
+        0 0 24px 6px var(--amber-gold);
+      z-index: 2;
+    }
+    /* 发光动画 */
+    .coffee-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: var(--card-radius);
+      background:
+        radial-gradient(circle at 48% 26%, #deb67c28 0 70%, transparent 83%);
+      opacity: 0;
+      transition: opacity 0.38s;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .coffee-card:hover::before, .coffee-card:focus::before {
+      opacity: 1;
+    }
+    .coffee-icon {
+      font-size: 3.4rem;
+      margin-bottom: .7rem;
+      text-shadow: 0 2px 20px #a77850a4;
+      user-select: none;
+      pointer-events: none;
+      transition: filter .23s;
+    }
+    .coffee-title {
+      font-family: var(--text-typer);
+      font-size: 1.35rem;
+      letter-spacing: .07em;
+      color: var(--amber-gold);
+      margin-bottom: 0.38rem;
+      text-align: center;
+      user-select: none;
+      text-shadow: 0 2px 10px #64482cf0;
+    }
+    .coffee-desc {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0.4em 0 0.3em 0;
+      font-size: 1.06rem;
+    }
+    .coffee-tag {
+      font-size: 1.13em;
+      color: var(--amber-gold);
+      font-family: var(--text-typer);
+      text-align: center;
+      margin-bottom: 0.12em;
+      letter-spacing: 0.02em;
+      font-weight: bold;
+      line-height: 1.2;
+    }
+    .coffee-detail {
+      font-family: var(--text-sans);
+      text-align: center;
+      color: var(--milk-white);
+      line-height: 1.63;
+      font-size: 1.06rem;
+      margin-bottom: 0.1em;
+    }
+    /* 蒸汽动画（咖啡杯） */
+    .steam {
+      position: absolute;
+      top: 32px; left: 50%;
+      transform: translateX(-50%);
+      opacity: .55;
+      z-index: 10;
+      pointer-events: none;
+      width: 54px; height: 43px;
+      display: flex;
+      flex-direction: row;
+      gap: 11px;
+    }
+    .steam span {
+      display: block;
+      width: 8px;
+      height: 34px;
+      background: linear-gradient(180deg, #fffbe2cc 23%, transparent 92%);
+      border-radius: 25px;
+      opacity: 0.45;
+      filter: blur(2.1px);
+      animation: steam-rise 2.7s ease-in-out infinite;
+      margin-top: 6px;
+    }
+    .steam span:nth-child(2) { animation-delay: .7s;width: 10px; filter: blur(3.2px);}
+    .steam span:nth-child(3) { animation-delay: 1.3s;width: 7px; filter: blur(2.4px); opacity: .27;}
+    @keyframes steam-rise {
+      0%   { opacity: 0.18; transform: translateY(16px) scaleX(1);}
+      25%  { opacity: 0.6; transform: translateY(0)   scaleX(1.07);}
+      47%  { opacity: 0.37;}
+      75%  { opacity: 0.11; transform: translateY(-25px) scaleX(1.09);}
+      100% { opacity: 0;   transform: translateY(-36px) scaleX(1);}
+    }
+
+    /* ====== 阅读区/关于区 ====== */
+    .reading-placeholder,
+    .about-text {
+      background: rgba(69,49,32,0.26);
+      border-radius: 1.2rem;
+      padding: 2.2rem 2.1rem 1.3rem 2.2rem;
+      max-width: 700px;
+      margin: 2.5rem auto 0 auto;
+      box-shadow: 0 1px 14px #23232864;
+      color: #FFE3B6;
+      line-height: 1.65;
+      font-size: 1.16rem;
+      font-family: var(--text-sans);
+    }
+    .reading-placeholder {
+      min-height: 120px;
+      text-align: center;
+      color: #a6d3ff;
+    }
+    .about-text {
+      color: #ffd999;
+      text-align: left;
+      font-size: 1.13rem;
+    }
+
+    /* ====== Bean AI按钮与聊天窗 ====== */
+    /* 替换：.bean-fab */
+    .bean-fab {
+      position: fixed;
+      right: 2.6rem;              /* 内缩一些，离右边更远些 */
+      bottom: 2.6rem;             /* 内缩一些，离底部更远些 */
+      width: 72px; height: 72px;  /* 从 56px -> 72px，按比例放大背景圆 */
+      background: linear-gradient(120deg, #8d5524 70%, #c68642 100%);
+      border-radius: 50%;
+      box-shadow: 0 10px 36px #150a0522; /* 影子相应放大 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 999;
+      transition: box-shadow .22s, transform .18s;
+      animation: breath 2.7s ease-in-out infinite;
+    }
+    @keyframes breath {
+      0%, 100% { transform: translateY(0) scale(1);} 
+      50%      { transform: translateY(-6px) scale(1.07);} 
+    }
+    /* 替换：.bean-emoji（图片或 inline 元素） */
+    .bean-emoji {
+      display: block;
+      width: 3.2rem;              /* 从 2.2rem -> 3.2rem，和圆形容器成比例 */
+      height: 3.2rem;
+      object-fit: contain;
+      pointer-events: none;
+      user-select: none;
+      filter: drop-shadow(0 3px 12px #c6864280); /* 阴影也相应增大 */
+    }
+    /* 替换：#bean-chat（聊天窗口上移，避免遮挡） */
+    #bean-chat {
+      display: none;
+      position: fixed;
+      bottom: 118px;               /* 原来 83px，随 .bean-fab 放大上移（约 +13px）*/
+      right: 2.6rem;              /* 与 .bean-fab 保持对齐 */
+      width: 330px;
+      background: rgba(46,31,27,0.97);
+      box-shadow: 0 2px 32px 0 #24160dc6;
+      border-radius: 1.3rem;
+      z-index: 990;
+      overflow: hidden;
+      flex-direction: column;
+      animation: chat-show .18s;
+    }
+    #bean-chat.active { display: flex; }
+    @keyframes chat-show {
+      from { opacity: 0; transform: translateY(60px);} 
+      to   { opacity: 1; transform: translateY(0);} 
+    }
+    .bean-chat-header {
+      background: linear-gradient(90deg, #ffbe76 70%, #c68642 100%);
+      color: #543b26;
+      font-family: var(--text-sans);
+      font-size: 1.13rem;
+      padding: 1.1rem 1.2rem 0.7rem 1.1rem;
+    }
+    .bean-chat-messages {
+      height: 120px;
+      background: transparent;
+      padding: 0.8rem 1.18rem;
+      color: var(--milk-white);
+      font-size: 1rem;
+      font-family: var(--text-sans);
+      overflow-y: auto;
+      flex: 1;
+    }
+    .bean-chat-input-area {
+      padding: 0.8rem 1.13rem;
+      background: #382415;
+      border-top: 1px solid #5a3e29;
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+    }
+    .bean-chat-input {
+      flex: 1;
+      padding: 0.55em 1.01em;
+      border: none;
+      border-radius: 1.1rem;
+      font-size: 1rem;
+      font-family: var(--text-sans);
+      background: #fff8e7;
+      color: #51361a;
+      outline: none;
+      transition: box-shadow .18s;
+    }
+    .bean-chat-send {
+      background: linear-gradient(90deg, var(--amber-gold), #fad096 100%);
+      border: none;
+      border-radius: 50%;
+      width: 38px; height: 38px;
+      font-size: 1.21rem;
+      color: var(--coffee-deep);
+      cursor: pointer;
+      box-shadow: 0 2px 8px #ffbe7620;
+      transition: background .2s;
+    }
+    /* Bean移动端适配 */
+    @media (max-width:600px) {
+      .bean-fab { right: 4vw; bottom: 2vw; }
+      #bean-chat { width: 94vw; right: 2vw; bottom: 75px;}
+    }
+    
+
+
+
+    /* ====== 页脚 ====== */
+    footer {
+      margin-top: 5.2rem;
+      width: 100vw;
+      padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+      background: rgba(31, 20, 15, 0.92);
+      color: var(--amber-gold);
+      font-family: var(--text-typer);
+      font-size: 1.11rem;
+      text-align: center;
+      letter-spacing: .07em;
+      position: relative;
+      z-index: 20;
+      box-shadow: 0 -1px 24px #22314a50;
+    }
+    .footer-social {
+      margin-top: 0.6rem;
+      display: flex;
+      justify-content: center;
+      gap: 1.10rem;
+    }
+    .footer-social a {
+      color: var(--amber-gold);
+      font-size: 1.35rem;
+      margin: 0 0.17rem;
+      text-decoration: none;
+      transition: color .22s;
+    }
+    .footer-social a:hover { color: #fff8e7; }
+    .footer-copyright {
+      margin-top: 0.25rem;
+      color: #f9f5f080;
+      font-family: var(--text-sans);
+      font-size: 0.98rem;
+      letter-spacing: .03em;
+    }
+    .hero-center-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+      height: calc(100vh - var(--header-height) - 48px);
+      width: 100%;
+      box-sizing: border-box;
+      transform: translateY(-7vh);
+    }
+    .menu-intro {
+      text-align: center;
+      font-size: 1.65rem;
+      color: #a6d3ff;
+      font-family: var(--text-typer);
+      margin-bottom: 2.7rem;
+      margin-top: 2.8rem;
+      letter-spacing: .07em;
+      text-shadow: 0 2px 14px #22314a44;
+      font-weight: bold;
+    }
+    #section-menu .coffee-list {
+      margin-top: 2.1rem;
+    }
+
+    /* ===== 新增：menu 子导航与书单样式（不影响原有布局） ===== */
+    .menu-subnav-wrap {
+      max-width: 1220px;
+      margin: 0 auto 6px 1.1rem;
+      padding: 0 1.1rem;
+    }
+    .menu-subnav {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      overflow-x: auto;
+      padding: 6px 6px;
+      scrollbar-width: thin;
+    }
+    .menu-subnav button {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255,255,255,0.03);
+      color: var(--milk-white);
+      border: 1px solid rgba(255,255,255,0.04);
+      padding: 8px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--text-sans);
+      transition: background .18s, transform .12s;
+      white-space: nowrap;
+    }
+    .menu-subnav button:hover, .menu-subnav button:focus {
+      background: linear-gradient(90deg, rgba(255,190,118,0.14), rgba(255,190,118,0.06));
+      transform: translateY(-3px);
+      color: var(--amber-gold);
+    }
+    .menu-subnav .icon { font-size: 1.35rem; }
+    .menu-subnav .tag { font-family: var(--text-typer); color: var(--amber-gold); font-size: .95rem; }
+
+    .menu-category {
+      max-width: 1220px;
+      margin: 1.6rem auto;
+      padding: 0 1.1rem;
+      background: rgba(36,30,24,0.06);
+      border-radius: 12px;
+    }
+    .category-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .category-header .icon { font-size: 2.2rem; color: var(--amber-gold); }
+    .category-header .title { font-family: var(--text-typer); font-size: 1.5rem; color: #ffdca8; }
+    .category-header .meta { margin-left: 10px; color: #a6d3ff; font-size: 0.98rem; font-family: var(--text-sans); }
+
+    .book-list { padding: 12px 16px 20px 16px; display: flex; flex-direction: column; gap: 12px; }
+    .book-item {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 12px; /*gap 图标与标题之间*/
+      align-items: start;
+      background: rgba(255,255,255,0.02);
+      padding: 10px; /*padding 上下内边距*/
+      border-radius: 10px;
+    }
+    .book-item .cover {
+      width: 52px; height: 76px;
+      border-radius: 6px;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+      flex-shrink: 0;
+    }
+    .book-item .info { color: #fff8e7; font-size: 0.98rem; line-height: 1.34; }
+    .book-item .info .title { font-weight: 600; color: #ffdca8; margin-bottom: 6px; }
+    .book-item .info .meta { color: #e7d5b8;font-size: .9rem;margin-bottom:6px; }
+    .book-item .brief { color: #efe6d1; font-size: .92rem; opacity: .92; }
+
+    /* 序号样式（左上角小号） */
+    .book-item[data-index] { position: relative; padding-left: 14px; }
+    .book-item[data-index]::before {
+      content: attr(data-index);
+      position: absolute;
+      left: -10px; top: -10px;
+      background: var(--amber-gold);
+      color: var(--coffee-deep);
+      font-weight: 700;
+      padding: 6px 8px;
+      border-radius: 10px;
+      font-family: var(--text-typer);
+      font-size: .86rem;
+    }
+
+    @media (max-width:900px) {
+      .menu-subnav-wrap { margin-left: 0; padding: 0 1.1rem; }
+      .book-item { grid-template-columns: 44px 1fr; }
+      .book-item .cover { width:44px; height:64px; }
+    }
+    /* ===== 新增结束 ===== */
+
+    /* ==== 阅读区：搜索与上传样式 ==== */
+.ebook-search { max-width: 880px; margin: 12px auto 0; display:flex; gap:10px; align-items:center; padding:0 12px; box-sizing:border-box; }
+.ebook-search input[type="search"] {
+  flex: 1;
+  padding: 0.92rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #e6e6e6;    /* 轻微边框，提升可见性 */
+  background: #f3f4f6;           /* 灰白色实底（非透明） */
+  color: #222;                   /* 深色文字，方便阅读 */
+  font-size: 1rem;
+  outline: none;
+  box-shadow: 0 4px 18px rgba(34,49,74,0.06);
+  transition: box-shadow .16s, border-color .12s;
+}
+.ebook-search input[type="search"]::placeholder {
+  color: #7a7a7a; /* 占位符灰色 */
+}
+.ebook-search input[type="search"]:focus {
+  border-color: rgba(255,190,118,0.9);
+  box-shadow: 0 8px 30px rgba(255,190,118,0.08);
+}
+.ebook-search button {
+  padding:0.68rem 1.1rem;
+  border-radius:12px;
+  border:none;
+  background: linear-gradient(90deg, var(--amber-gold), #fad096);
+  color: var(--coffee-deep);
+  font-weight:700;
+  cursor:pointer;
+  box-shadow: 0 2px 12px #ffebc020;
+}
+.search-meta { max-width:880px; margin:8px auto 0; color:#cfe9ff; font-size:0.95rem; padding:0 12px; }
+
+/* 上传区 */
+.upload-area {
+  max-width:880px;
+  margin:1rem auto 2rem;
+  padding:18px;
+  border-radius:12px;
+  border: 1px dashed rgba(255,255,255,0.30); /* 透明度改为 30%（0.3） */
+  background: rgba(255,255,255,0.02);
+  text-align:center;
+  color:#e6f4ff;
+  transition: border-color .18s, background .18s, box-shadow .18s;
+}
+.upload-area.dragover { border-color: var(--amber-gold); background: rgba(255,190,118,0.03); box-shadow: 0 6px 26px rgba(34,49,74,0.18); }
+.upload-area input[type=file] { display:none; }
+.upload-actions { margin-top:12px; display:flex; justify-content:center; gap:8px; }
+.upload-list { margin-top:12px; text-align:left; color:#ffdca8; font-size:0.95rem; padding:0 6px; }
+
+/* 搜索命中高亮（仅视觉） */
+.search-hit { background: rgba(255,190,118,0.12); padding:2px 6px; border-radius:6px; }
+
+.note-entry-wrap {
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 1.2rem;
+  border-radius: 1.2rem;
+  background: rgba(34, 49, 74, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+  transition: transform 0.24s, opacity 0.24s;
+  opacity: 0.95;
+}
+.note-entry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.75rem 1.2rem;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--text-sans);
+  font-weight: 700;
+  color: var(--milk-white);
+  background: linear-gradient(132deg, #4b3621 64%, var(--night-blue) 100%);
+  box-shadow: var(--soft-shadow);
+  transition: transform 0.37s cubic-bezier(.19,.7,.43,1.4), box-shadow .27s, filter .18s;
+  will-change: transform;
+}
+
+/* 悬停/聚焦时的“上升 + 发光”效果，参考 coffee-card 的样式 */
+.note-entry-btn:hover,
+.note-entry-btn:focus {
+  transform: translateY(-14px) scale(1.04);
+  box-shadow:
+    0 2px 32px 0 rgba(255,190,118,0.27),
+    0 0 24px 6px rgba(255,190,118,0.12);
+  outline: none;
+}
+
+/* 图标与文字 */
+.note-entry-btn .note-icon { font-size: 1.3rem; line-height: 1; }
+.note-entry-btn .note-text { font-size: 1rem; color: #ffdca8; }
+
+/* 小窗/窄屏微调，避免遮挡 Bean 按钮 */
+@media (max-width: 600px) {
+  .note-entry-wrap { bottom: 4.8rem; } /* 移高一点，给移动设备底部留空间 */
+  .note-entry-btn { padding: 0.6rem 1rem; border-radius: 12px; }
+  .note-entry-btn .note-text { font-size: 0.95rem; }
+}
+    /* ====== 动画：渐显与上移 ====== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.note-entry-wrap {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* ====== Bean AI咖啡豆按钮 动画 ====== */
+@keyframes beanFabPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.bean-fab {
+  animation: beanFabPulse 2.5s ease-in-out infinite;
+}
+  </style>
+</head>
+<body>
+  <!-- ======= 顶部导航栏 ======= -->
+  <header>
+    <div class="nav-inner">
+      <div class="logo">Chapter Café</div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="菜单">
+        <span></span>
+      </button>
+      <nav id="mainNav">
+        <button class="nav-link" data-section="home">Home</button>
+        <button class="nav-link" data-section="menu">Menu</button>
+        <button class="nav-link" data-section="reading">Reading</button>
+        <button class="nav-link" data-section="about">About</button>
+      </nav>
+    </div>
+  </header>
+  <!-- ======= 主体区 ======= -->
+  <main>
+    <!-- 首页主视觉 -->
+    <section class="section active" id="section-home">
+      <div class="hero-center-group">
+        <h1 class="hero-title">Welcome to Chapter Café</h1>
+        <div class="hero-subtitle">每个故事，都有属于它的香气</div>
+        <button class="enter-btn" id="enterBtn">Enter the Café</button>
+      </div>
+    </section>
+    <!-- 咖啡菜单区 -->
+    <section class="section" id="section-menu">
+      <div class="menu-intro">点一杯咖啡，开启一段故事。</div>
+      <!-- 移动：把阅读区的书名搜索框放在 menu 区（位于 menu-intro 下方） -->
+      <form id="ebookSearchForm" class="ebook-search" role="search" aria-label="搜索电子书">
+      <input id="ebookSearchInput" type="search" placeholder="在站内书名中搜索（例如：东方快车谋杀案 / 恶意）" aria-label="搜索电子书" />
+      <button type="submit" aria-label="搜索">搜索</button>
+      </form>
+      <div id="ebookSearchMeta" class="search-meta" aria-live="polite"></div>
+
+
+      <!-- 直接使用原有五个 coffee-card 作为导航，data-target 指向页面内子标题锚点 -->
+      <div class="coffee-list">
+        <div class="coffee-card" data-target="menu-espresso" tabindex="0" role="button" title="跳转到 Espresso">
+          <div class="steam"><span></span><span></span><span></span></div>
+          <div class="coffee-icon">☕️</div>
+          <div class="coffee-title">Espresso</div>
+          <div class="coffee-desc">
+            <div class="coffee-tag">【悬疑 / 推理】</div>
+            <div class="coffee-detail">香醇浓厚，谜团如夜色酝酿。</div>
+          </div>
+        </div>
+        <div class="coffee-card" data-target="menu-latte" tabindex="0" role="button" title="跳转到 Latte">
+          <div class="steam"><span></span><span></span><span></span></div>
+          <div class="coffee-icon">🥛</div>
+          <div class="coffee-title">Latte</div>
+          <div class="coffee-desc">
+            <div class="coffee-tag">【言情 / 治愈】</div>
+            <div class="coffee-detail">奶香温厚，浪漫故事蜜意萦绕。</div>
+          </div>
+        </div>
+        <div class="coffee-card" data-target="menu-mocha" tabindex="0" role="button" title="跳转到 Mocha">
+          <div class="steam"><span></span><span></span><span></span></div>
+          <div class="coffee-icon">🍫</div>
+          <div class="coffee-title">Mocha</div>
+          <div class="coffee-desc">
+            <div class="coffee-tag">【奇幻 / 冒险】</div>
+            <div class="coffee-detail">巧克力的甜中夹着魔法与冒险。</div>
+          </div>
+        </div>
+        <div class="coffee-card" data-target="menu-pourover" tabindex="0" role="button" title="跳转到 Pour-over">
+          <div class="steam"><span></span><span></span><span></span></div>
+          <div class="coffee-icon">🫖</div>
+          <div class="coffee-title">Pour-over</div>
+          <div class="coffee-desc">
+            <div class="coffee-tag">【文艺 / 散文】</div>
+            <div class="coffee-detail">手工慢萃，句句如杯中漂浮的光影。</div>
+          </div>
+        </div>
+        <div class="coffee-card" data-target="menu-iced" tabindex="0" role="button" title="跳转到 Iced Americano">
+          <div class="steam"><span></span><span></span><span></span></div>
+          <div class="coffee-icon">🧊</div>
+          <div class="coffee-title">Iced Americano</div>
+          <div class="coffee-desc">
+            <div class="coffee-tag">【科幻 / 哲学】</div>
+            <div class="coffee-detail">冷静，深邃，发人深省。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 下方五个子标题锚点（保持原有内容，不变） -->
+      <div id="menu-espresso" class="menu-category" tabindex="-1" aria-labelledby="espresso-label">
+        <div class="category-header">
+          <div class="icon">☕️</div>
+          <div>
+            <div class="title" id="espresso-label">Espresso <span class="meta">【悬疑 / 推理】</span></div>
+          </div>
+        </div>
+        <div class="book-list">
+          <div class="book-item" data-index="1">
+          <div class="cover" style="background-image:url('https://cdn.weread.qq.com/weread/cover/29/3300020529/t6_3300020529.jpg');"></div>
+          <div class="info">
+            <div class="title"><a href="malice.html" style="color:inherit; text-decoration:underline; text-decoration-color: rgba(255,190,118,0.36);" title="查看恶意详情">恶意</a></div>
+            <div class="meta">作者：东野圭吾 · 日本 </div>
+            <div class="brief">赌上全部人生也要贯彻到底的恶意，究竟从何而来？</div>            </div>
+          </div>
+          <div class="book-item" data-index="2">
+          <div class="cover" style="background-image:url('https://cdn.weread.qq.com/weread/cover/53/yuewen_728497/t6_yuewen_7284971680854100.jpg');"></div>
+          <div class="info">
+            <div class="title"><a href="murder_on_the_orient_express.html" style="color:inherit; text-decoration:underline; text-decoration-color: rgba(255,190,118,0.36);" title="查看东方快车谋杀案详情">东方快车谋杀案</a></div>
+            <div class="meta">作者：阿加莎·克里斯蒂 · 英国 </div>
+            <div class="brief">封闭空间中的悬疑，人物关系错综，谜团层层推进。</div>            </div>
+          </div>
+          <div class="book-item" data-index="3">
+            <div class="cover" style="background-image:url('https://cdn.weread.qq.com/weread/cover/63/yuewen_728514/t6_yuewen_7285141680854106.jpg');"></div>
+            <div class="info">
+              <div class="title"><a href="and_then_there_were_none.html" style="color:inherit; text-decoration:underline; text-decoration-color: rgba(255,190,118,0.36);" title="查看无人生还详情">无人生还</a></div>
+              <div class="meta">作者：阿加莎·克里斯蒂 · 英国 </div>
+              <div class="brief">十个陌生人被邀请到一个孤岛上，逐一被杀，真相扑朔迷离。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="4">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">人间椅子</div>
+              <div class="meta">作者：江户川乱步 · 日本</div>
+              <div class="brief">一部充满心理悬疑与恐怖元素的短篇小说集。</div>
+            </div>
+          </div>
+          <!-- 追加：Espresso 5-20 -->
+          <div class="book-item" data-index="5">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">嫌疑人X的献身</div>
+              <div class="meta">作者：东野圭吾 · 日本</div>
+              <div class="brief">逻辑与情感极限对决的反推理名作。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="6">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">白夜行</div>
+              <div class="meta">作者：东野圭吾 · 日本</div>
+              <div class="brief">跨越多年的人性幽暗与隐秘羁绊。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="7">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">福尔摩斯探案集</div>
+              <div class="meta">作者：阿瑟·柯南·道尔 · 英国</div>
+              <div class="brief">演绎法与现代侦探叙事的基础典范。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="8">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">巴斯克维尔的猎犬</div>
+              <div class="meta">作者：阿瑟·柯南·道尔 · 英国</div>
+              <div class="brief">雾霭荒原与理性破案的哥特气氛。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="9">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">尼罗河上的惨案</div>
+              <div class="meta">作者：阿加莎·克里斯蒂 · 英国</div>
+              <div class="brief">度假场景的封闭式心理与动机链。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="10">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">马耳他之鹰</div>
+              <div class="meta">作者：达希尔·哈米特 · 美国</div>
+              <div class="brief">硬汉派的冷峻与都市腐蚀质感。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="11">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">长眠不醒</div>
+              <div class="meta">作者：雷蒙德·钱德勒 · 美国</div>
+              <div class="brief">黑色烟雾与暧昧道德地带的范式。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="12">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">龙纹身的女孩</div>
+              <div class="meta">作者：斯蒂格·拉森 · 瑞典</div>
+              <div class="brief">数据与记忆撬动家族黑暗档案。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="13">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">沉默的羔羊</div>
+              <div class="meta">作者：托马斯·哈里斯 · 美国</div>
+              <div class="brief">犯罪心理与操控话语的双层凝视。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="14">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">消失的爱人</div>
+              <div class="meta">作者：吉莉安·弗琳 · 美国</div>
+              <div class="brief">婚姻结构与叙事不可靠性的逆转。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="15">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">达·芬奇密码</div>
+              <div class="meta">作者：丹·布朗 · 美国</div>
+              <div class="brief">符号学拼图与节奏驱动式悬疑。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="16">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">玫瑰的名字</div>
+              <div class="meta">作者：翁贝托·埃科 · 意大利</div>
+              <div class="brief">中世纪文本迷宫与多重诠释。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="17">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">月亮宝石</div>
+              <div class="meta">作者：威尔基·柯林斯 · 英国</div>
+              <div class="brief">早期侦探多视角结构的范例文本。</div>
+            </div>
+          </div>
+            <div class="book-item" data-index="18">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">点与线</div>
+              <div class="meta">作者：松本清张 · 日本</div>
+              <div class="brief">社会派推理中细节与时序的精准拼接。</div>
+            </div>
+          </div>
+        </div> <!-- .book-list -->
+      </div> <!-- #menu-espresso -->
+
+      <div id="menu-latte" class="menu-category" tabindex="-1" aria-labelledby="latte-label">
+        <div class="category-header">
+          <div class="icon">🥛</div>
+          <div>
+            <div class="title" id="latte-label">Latte <span class="meta">【言情 / 治愈】</span></div>
+          </div>
+        </div>
+        <div class="book-list">
+          <div class="book-item" data-index="1">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">小王子</div>
+              <div class="meta">作者：圣-埃克苏佩里 · 法国</div>
+              <div class="brief">童话般温柔的叙述，关于理解、陪伴与爱的反思。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="2">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">傲慢与偏见</div>
+              <div class="meta">作者：简·奥斯汀 · 英国</div>
+              <div class="brief">风趣与爱情并行，成长与理解逐步化解偏见。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="3">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">简·爱</div>
+              <div class="meta">作者：夏洛蒂·勃朗特 · 英国</div>
+              <div class="brief">一部关于自我发现与爱情的经典小说，情感真挚。</div>
+            </div>
+          </div>
+          <!-- 追加：Latte 4-20 -->
+          <div class="book-item" data-index="4">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">小妇人</div>
+              <div class="meta">作者：路易莎·梅·奥尔科特 · 美国</div>
+              <div class="brief">姐妹成长与女性自我定位温情图景。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="5">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">呼啸山庄</div>
+              <div class="meta">作者：艾米莉·勃朗特 · 英国</div>
+              <div class="brief">极端情感与荒原象征的双重回声。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="6">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">红楼梦</div>
+              <div class="meta">作者：曹雪芹 · 中国</div>
+              <div class="brief">贾宝玉和林黛玉的爱情悲剧。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="7">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">飘</div>
+              <div class="meta">作者：玛格丽特·米切尔 · 美国</div>
+              <div class="brief">战争与重建背景下女性韧性曲线。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="8">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">绿山墙的安妮</div>
+              <div class="meta">作者：露西·莫德·蒙哥马利 · 加拿大</div>
+              <div class="brief">孤女融入群体与情感色彩的疗愈。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="9">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">深夜加油站遇见苏格拉底</div>
+              <div class="meta">作者：Dan Millman · 美国</div>
+              <div class="brief">对话体心灵成长与内在觉察旅程。</div>
+            </div>
+          </div>
+        </div> <!-- .book-list -->
+      </div> <!-- #menu-latte -->
+
+      <div id="menu-mocha" class="menu-category" tabindex="-1" aria-labelledby="mocha-label">
+        <div class="category-header">
+          <div class="icon">🍫</div>
+          <div>
+            <div class="title" id="mocha-label">Mocha <span class="meta">【奇幻 / 冒险】</span></div>
+          </div>
+        </div>
+        <div class="book-list">
+          <div class="book-item" data-index="1">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">西游记</div>
+              <div class="meta">作者：吴承恩 · 中国 </div>
+              <div class="brief">中国古典四大名著之一，讲述唐僧师徒四人西天取经的故事。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="2">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">哈利·波特</div>
+              <div class="meta">作者：J·K·罗琳 · 英国 </div>
+              <div class="brief">魔法世界的奇幻冒险，成长与友情的史诗。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="3">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">魔戒</div>
+              <div class="meta">作者：J·R·R·托尔金 · 英国 </div>
+              <div class="brief">宏大奇幻世界与英雄史诗，探讨勇气、牺牲与希望。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="4">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">鲁滨逊漂流记</div>
+              <div class="meta">作者：丹尼尔·笛福 · 英国</div>
+              <div class="brief">一个人在荒岛上的生存故事，探讨孤独与人性的坚韧。</div>
+            </div>
+          </div>
+          <!-- 追加：Mocha 5-20 -->
+          <div class="book-item" data-index="5">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">霍比特人</div>
+              <div class="meta">作者：J·R·R·托尔金 · 英国</div>
+              <div class="brief">意外旅程与勇气成长的先声。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="6">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">爱丽丝梦游仙境</div>
+              <div class="meta">作者：刘易斯·卡罗尔 · 英国</div>
+              <div class="brief">逻辑颠覆与荒诞视觉的语义游戏。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="7">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">绿野仙踪</div>
+              <div class="meta">作者：莱曼·弗兰克·鲍姆 · 美国</div>
+              <div class="brief">友谊与自我缺失补全的轻奇幻旅程。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="8">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">金银岛</div>
+              <div class="meta">作者：罗伯特·路易斯·史蒂文森 · 英国</div>
+              <div class="brief">海盗冒险与成长欲望的原型文本。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="9">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">海底两万里</div>
+              <div class="meta">作者：儒尔·凡尔纳 · 法国</div>
+              <div class="brief">前瞻科技与探索精神的水下史诗。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="10">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">基督山伯爵</div>
+              <div class="meta">作者：大仲马 · 法国</div>
+              <div class="brief">复仇与身份重塑的层层布局冒险。</div>
+            </div>
+          </div>
+        </div> <!-- .book-list -->
+      </div> <!-- #menu-mocha -->
+
+      <div id="menu-pourover" class="menu-category" tabindex="-1" aria-labelledby="pourover-label">
+        <div class="category-header">
+          <div class="icon">🫖</div>
+          <div>
+            <div class="title" id="pourover-label">Pour-over <span class="meta">【文艺 / 散文】</span></div>
+          </div>
+        </div>
+        <div class="book-list">
+          <div class="book-item" data-index="1">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">瓦尔登湖</div>
+              <div class="meta">作者：亨利·戴维·梭罗 </div>
+              <div class="brief">对简朴生活与自然的沉思，文字静谧而饱含哲理。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="2">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">挪威的森林</div>
+              <div class="meta">作者：村上春树 · 日本 </div>
+              <div class="brief">青春、惆怅与记忆的叙述，感情细腻且富有诗意。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="3">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">朝花夕拾</div>
+              <div class="meta">作者：鲁迅 · 中国 </div>
+              <div class="brief">鲁迅回忆童年与青年的散文集，情感真挚且富有哲理。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="4">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">浮生六记</div>
+              <div class="meta">作者：沈复 · 中国 </div>
+              <div class="brief">清代文人的生活随笔，细腻描绘日常与情感。</div>
+            </div>
+          </div>
+          <!-- 追加：Pour-over 5-20 -->
+          <div class="book-item" data-index="5">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">百年孤独</div>
+              <div class="meta">作者：加西亚·马尔克斯 · 哥伦比亚</div>
+              <div class="brief">家族循环与孤独命运的魔幻现实。 </div>
+            </div>
+          </div>
+          <div class="book-item" data-index="6">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">杀死一只知更鸟</div>
+              <div class="meta">作者：哈珀·李 · 美国</div>
+              <div class="brief">童年视角下的正义、偏见与同理。 </div>
+            </div>
+          </div>
+          <div class="book-item" data-index="7">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">人类群星闪耀时</div>
+              <div class="meta">作者：斯蒂芬·茨威格 · 奥地利</div>
+              <div class="brief">历史瞬间与人物心理的散文化凝缩。</div>
+            </div>
+          </div>
+        </div> <!-- .book-list -->
+      </div> <!-- #menu-pourover -->
+
+      <div id="menu-iced" class="menu-category" tabindex="-1" aria-labelledby="iced-label">
+        <div class="category-header">
+          <div class="icon">🧊</div>
+          <div>
+            <div class="title" id="iced-label">Iced Americano <span class="meta">【科幻 / 哲学】</span></div>
+          </div>
+        </div>
+        <div class="book-list">
+          <div class="book-item" data-index="1">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">三体</div>
+              <div class="meta">作者：刘慈欣 · 中国 / 出版：2006</div>
+              <div class="brief">宏观宇宙观与人类文明的较量，思想激荡。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="2">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">美丽新世界</div>
+              <div class="meta">作者：阿道司·赫胥黎 · 美国 / 出版：1932</div>
+              <div class="brief">科幻中的诗性与宗教、命运的多重探讨。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="3">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">仿生人会梦见电子羊吗？</div>
+              <div class="meta">作者：菲利普·K·迪克 · 美国 / 出版：1968</div>
+              <div class="brief">探讨人性与现实的科幻经典，深刻且引人思考。</div>
+            </div>
+          </div>
+          <!-- 追加：Iced Americano 4-20 -->
+          <div class="book-item" data-index="4">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">一九八四</div>
+              <div class="meta">作者：乔治·奥威尔 · 英国</div>
+              <div class="brief">语言控制与极权监视的预警寓言。</div>
+            </div>
+          </div>
+          <div class="book-item" data-index="13">
+            <div class="cover" style="background-image:url('https://via.placeholder.com/80x110?text=封面');"></div>
+            <div class="info">
+              <div class="title">雪崩</div>
+              <div class="meta">作者：尼尔·斯蒂芬森 · 美国</div>
+              <div class="brief">虚拟都市与语言病毒的赛博奇想。</div>
+            </div>
+          </div>
+        </div> <!-- .book-list -->
+      </div> <!-- #menu-iced -->
+
+    </section>
+
+    <!-- 阅读区 -->
+    <section class="section" id="section-reading">
+      <!-- 两栏可调布局：左侧阅读（主），右侧笔记（可收起） - 调整为撑满页面，文本框透明度10%，收起后右侧消失，展开按钮靠右上 -->
+      <style>
+        /* split layout - 撑满可视区（紧贴 header 下方），移除 max-width 以扩大两栏视觉宽度 */
+        .split-wrap {
+          max-width: none;
+          width: calc(100vw - 24px);
+          margin: 6px auto;
+          height: calc(100vh - var(--header-height) - 12px);
+          min-height: 420px;
+          display: flex;
+          gap: 0;
+          padding: 0 12px;
+          box-sizing: border-box;
+        }
+        .split-left, .split-right {
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          /* 使用与 coffee-card 相同的棕色->蓝色渐变视觉 */
+          background: linear-gradient(132deg, #4b3621 64%, var(--night-blue) 100%);
+          border-radius: 10px;
+          box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+        }
+        /* 左侧主区略宽，右侧笔记略窄；两栏初始占满更大横向面积 */
+        .split-left { flex-basis: 72%; min-width: 180px; margin-right: 6px; padding: 18px; }
+        .split-right { flex-basis: 28%; min-width: 160px; margin-left: 6px; padding: 14px; position: relative; transition: width .18s ease, flex-basis .18s ease; display: flex; flex-direction: column; }
+         .divider { width:8px; cursor:col-resize; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:6px; display:flex; align-items:center; justify-content:center; }
+         .divider .bar { width:2px; height:48px; background:rgba(255,255,255,0.06); border-radius:2px; }
+ 
+        /* reader content - 更低透明度的浅灰色填充（显著减小） */
+         .reader-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+         .btn-ghost { background:transparent;border:1px solid rgba(255,255,255,0.06); color:#ffdca8; padding:8px 12px; border-radius:8px; cursor:pointer; }
+         .reader-content {
+            flex: 1;
+            overflow: auto;
+            /* 保持浅灰色实底但稍有透明度，让底层棕蓝渐变若隐若现 */
+            background: linear-gradient(132deg, #4b3621 64%, var(--night-blue) 100%);
+            padding: 20px;
+            border-radius: 8px;
+            color: var(--milk-white); /* 深色背景上使用浅色文字以保证可读性 */
+            line-height: 1.7;
+            font-size: 1rem;
+            white-space: pre-wrap;
+            box-shadow: none;
+          }
+
+         .reader-empty { color:#6b7280; text-align:center; padding:36px 12px; }
+ 
+         /* notes */
+         .notes-toolbar { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; }
+        /* 笔记区外框与内框也采用相同渐变（textarea 保持浅灰填充以便输入可读） */
+         .notes-area {
+            width: 100%;
+            height: 100%;
+            min-height: 160px;
+            background: linear-gradient(132deg, #4b3621 64%, var(--night-blue) 100%);
+            color: var(--milk-white);
+            border-radius: 6px;
+            padding: 10px;
+            box-sizing: border-box;
+          }
+
+    /* textarea 保持浅灰背景，便于编辑时与深色容器形成对比 */
+        .notes-textarea {
+            width: 100%;
+            height: 100%;
+            min-height: 160px;
+            background: #f3f4f6;
+            color: #111;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 6px;
+            padding: 10px;
+            resize: vertical;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+          }
+    /* Markdown 预览区样式 */
+    .notes-preview {
+      display: none;
+      width: 100%;
+      height: 100%;
+      min-height: 160px;
+      background: #fff8e7;
+      color: #222;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 6px;
+      padding: 12px 14px;
+      box-sizing: border-box;
+      overflow: auto;
+    }
+    .notes-preview h1, .notes-preview h2, .notes-preview h3 { color: #4b3621; margin: .4em 0; }
+    .notes-preview pre { background: #272822; color: #f8f8f2; padding: 8px 10px; border-radius: 6px; overflow:auto; }
+    .notes-preview code { background: #f1e6d1; padding: 2px 4px; border-radius: 4px; }
+    .notes-preview table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+    .notes-preview th, .notes-preview td { border: 1px solid #e0d4bf; padding: 6px 8px; }
+    .notes-preview th { background: #fde9c6; }
+    .notes-preview blockquote { border-left: 4px solid #deb67c; margin: 6px 0; padding: 6px 10px; background: #fff2d9; }
+  /* 预览内的灰色提示文本（用于模板说明） */
+  .notes-preview .md-hint { color:#8a8a8a; font-size:0.92em; margin:6px 0 4px 0; }
+
+    /* 视图模式控制 */
+    .notes-area.view-edit .notes-textarea { display: block; }
+    .notes-area.view-edit .notes-preview { display: none; }
+    .notes-area.view-preview .notes-textarea { display: none; }
+    .notes-area.view-preview .notes-preview { display: block; }
+    .notes-area.view-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch; }
+    .notes-area.view-split .notes-textarea { display: block; height: 100%; }
+    .notes-area.view-split .notes-preview { display: block; height: 100%; }
+         .notes-collapse-btn { position:absolute; left:-44px; top:12px; transform:translateX(-6px); width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:linear-gradient(90deg,var(--amber-gold),#fad096); color:#2b160f; box-shadow:0 6px 18px rgba(0,0,0,0.32); cursor:pointer; }
+ 
+         /* collapsed small toggle (fixed near top-right, square, 左侧两个角弧度) */
+         .notes-mini-toggle { position:fixed; top: calc(var(--header-height) + 12px); right:12px; width:56px; height:56px; display:none; align-items:center; justify-content:center; background:linear-gradient(90deg,var(--amber-gold),#fad096); color:#2b160f; box-shadow:0 8px 30px rgba(0,0,0,0.45); cursor:pointer; z-index:1200; border-radius:8px 0 0 8px; } 
+         .notes-mini-toggle.visible { display:flex; }
+ 
+         /* 当笔记区域被收起时的样式（视觉占位被移除） */
+         .notes-collapsed { display:none !important; }
+
+         /* ========== 阅读区：划词复制悬浮按钮 ========== */
+         .selection-copy-btn {
+           position: fixed; /* 使用视口定位，便于根据 selection rect 定位 */
+           display: none;
+           width: 34px; height: 34px;
+           border: none;
+           border-radius: 50%;
+           background: linear-gradient(90deg, var(--amber-gold), #fad096);
+           color: #2b160f;
+           box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+           z-index: 1200;
+           cursor: pointer;
+           align-items: center;
+           justify-content: center;
+           font-size: 16px;
+         }
+         .selection-copy-btn:active { transform: scale(0.96); }
+
+         /* ========== 快捷笔记菜单 ========== */
+         .quick-notes-menu {
+           position: fixed;
+           display: none;
+           min-width: 140px;
+           padding: 6px;
+           background: rgba(46,31,27,0.98);
+           border: 1px solid rgba(255,255,255,0.06);
+           border-radius: 10px;
+           box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+           z-index: 1300;
+         }
+         .quick-notes-menu button {
+           width: 100%;
+           text-align: left;
+           background: transparent;
+           color: #ffdca8;
+           border: none;
+           border-radius: 8px;
+           padding: 8px 10px;
+           cursor: pointer;
+         }
+         .quick-notes-menu button:hover,
+         .quick-notes-menu button:focus {
+           background: rgba(255,190,118,0.12);
+           outline: none;
+         }
+ 
+         @media (max-width:900px) {
+           .split-wrap { flex-direction:column; height:auto; gap:12px; }
+           .divider { display:none; }
+           .notes-collapse-btn { left:auto; right:12px; transform:none; top:-22px; }
+           .notes-mini-toggle { top:72px; right:10px; width:48px; height:48px; border-radius:6px 0 0 6px; }
+         }
+       </style>
+
+      <div class="split-wrap" id="splitWrap" aria-label="阅读与笔记分栏">
+        <div class="split-left" id="readerPane" role="main" aria-label="阅读区域">
+          <div class="reader-toolbar">
+            <div style="font-weight:700;color:#ffdca8;">阅读区</div>
+            <div style="flex:1"></div>
+            <button class="btn-ghost" id="openLocalBtn" title="打开本地 TXT">打开本地 TXT</button>
+            <input id="readerFileInput" type="file" accept=".txt" style="display:none" />
+            <!-- 删除清除按钮，新增 下一章 + 返回目录 -->
+            <button class="btn-ghost" id="nextChapterBtn" title="跳到下一章">下一章 ➜</button>
+            <button class="btn-ghost" id="backDirectoryBtn" title="返回目录页">返回目录</button>
+            <select id="readerFontSize" class="btn-ghost" title="文字大小" style="padding:6px 8px;">
+              <option value="0.95rem">小</option>
+              <option value="1rem" selected>中</option>
+              <option value="1.08rem">大</option>
+              <option value="1.2rem">更大</option>
+            </select>
+          </div>
+          <div class="reader-content" id="readerContent">
+            <div class="reader-empty" id="readerEmpty">尚未加载书籍。请点击“打开本地 TXT”选择本地文本文件，或从菜单选择开始阅读。</div>
+          </div>
+        </div>
+
+        <div class="divider" id="divider" role="separator" aria-orientation="vertical" title="拖动调整宽度">
+          <div class="bar" aria-hidden="true"></div>
+        </div>
+
+        <div class="split-right" id="notesPane" role="complementary" aria-label="笔记区域">
+          <div class="notes-toolbar">
+            <div style="font-weight:700;color:#ffdca8;">✍️ 笔记区</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button class="btn-ghost" id="quickNotesBtn" title="快捷笔记">快捷笔记 ▾</button>
+              <button class="btn-ghost" id="notesModeEditBtn" title="仅编辑">编辑</button>
+              <button class="btn-ghost" id="notesModePreviewBtn" title="仅预览">预览</button>
+              <button class="btn-ghost" id="notesModeSplitBtn" title="分栏">双栏</button>
+              <button class="btn-ghost" id="saveNotesBtn" title="保存笔记到本地">保存</button>
+              <button class="btn-ghost" id="collapseNotesBtn" title="收起笔记">收起</button>
+            </div>
+          </div>
+          <div class="notes-area">
+            <textarea id="notesTextarea" class="notes-textarea" placeholder="在此使用 Markdown 记录读书笔记（支持 # 标题、- 列表、表格等）"></textarea>
+            <div id="notesPreview" class="notes-preview" aria-label="Markdown 预览"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 收起后出现的右侧小按钮（固定靠近顶部导航下方，正方形，左侧有弧度） -->
+      <button id="notesMiniToggle" class="notes-mini-toggle" aria-label="展开笔记">📝</button>
+
+      <script>
+        (function(){
+          // DOM
+          const divider = document.getElementById('divider');
+          const splitWrap = document.getElementById('splitWrap');
+          const readerPane = document.getElementById('readerPane');
+          const notesPane = document.getElementById('notesPane');
+          const openLocalBtn = document.getElementById('openLocalBtn');
+          const readerFileInput = document.getElementById('readerFileInput');
+          const readerContent = document.getElementById('readerContent');
+          const readerEmpty = document.getElementById('readerEmpty');
+          const nextChapterBtn = document.getElementById('nextChapterBtn');
+          const backDirectoryBtn = document.getElementById('backDirectoryBtn');
+          const readerFontSize = document.getElementById('readerFontSize');
+          const notesTextarea = document.getElementById('notesTextarea');
+          const saveNotesBtn = document.getElementById('saveNotesBtn');
+          const collapseNotesBtn = document.getElementById('collapseNotesBtn');
+          const notesMiniToggle = document.getElementById('notesMiniToggle');
+          const quickNotesBtn = document.getElementById('quickNotesBtn');
+          const notesModeEditBtn = document.getElementById('notesModeEditBtn');
+          const notesModePreviewBtn = document.getElementById('notesModePreviewBtn');
+          const notesModeSplitBtn = document.getElementById('notesModeSplitBtn');
+          const notesAreaEl = notesPane.querySelector('.notes-area');
+          const notesPreview = document.getElementById('notesPreview');
+          // 保存/刷新导航保护相关状态
+          let notesDirty = false;              // 是否存在未保存更改
+          let notesExplicitlySaved = true;     // 用户上次是否点过“保存”
+          const WARN_FLAG_KEY = 'notesWarnedOnce'; // 首次提示标记（sessionStorage）
+          // 快捷笔记菜单（动态创建）
+          const quickNotesMenu = document.createElement('div');
+          quickNotesMenu.className = 'quick-notes-menu';
+          quickNotesMenu.innerHTML = `
+            <button type="button" data-type="settings">设定集</button>
+            <button type="button" data-type="outline">大纲总结</button>
+          `;
+          document.body.appendChild(quickNotesMenu);
+          // 划词复制悬浮按钮（动态创建）
+          const selectionCopyBtn = document.createElement('button');
+          selectionCopyBtn.className = 'selection-copy-btn';
+          selectionCopyBtn.title = '复制到笔记';
+          selectionCopyBtn.setAttribute('aria-label', '复制选中文本到笔记');
+          selectionCopyBtn.textContent = '📋';
+          document.body.appendChild(selectionCopyBtn);
+
+          // restore persisted state
+          const state = { notesCollapsed: false, notesWidth: null, lastNotesWidth: null, bookText: null };
+          try {
+            const s = JSON.parse(localStorage.getItem('readingState') || '{}');
+            if (s) Object.assign(state, s);
+          } catch(e){}
+
+          // apply saved widths if present
+          if (state.notesWidth) {
+            notesPane.style.flexBasis = state.notesWidth;
+            // derive reader width
+            const nb = parseFloat(state.notesWidth);
+            if (!isNaN(nb)) {
+              readerPane.style.flexBasis = `${100 - nb}%`;
+            }
+          }
+
+          // load saved notes
+          const savedNotes = localStorage.getItem('readerNotes') || '';
+          notesTextarea.value = savedNotes;
+
+          // load saved book
+          if (localStorage.getItem('readerLastBook')) {
+            const txt = localStorage.getItem('readerLastBook');
+            setReaderText(txt);
+          } else if (state.bookText) {
+            setReaderText(state.bookText);
+          }
+
+          // file open
+          openLocalBtn.addEventListener('click', ()=> readerFileInput.click());
+          readerFileInput.addEventListener('change', (e)=>{
+            const f = e.target.files && e.target.files[0];
+            if (!f) return;
+            if (!f.name.toLowerCase().endsWith('.txt')) {
+              alert('仅支持 .txt 文本文件');
+              return;
+            }
+            const r = new FileReader();
+            r.onload = ()=> {
+              const txt = r.result || '';
+              setReaderText(txt);
+              localStorage.setItem('readerLastBook', txt); // persist last book
+              // remember also in readingState for compatibility
+              const st = JSON.parse(localStorage.getItem('readingState') || '{}') || {};
+              st.bookText = txt;
+              localStorage.setItem('readingState', JSON.stringify(st));
+            };
+            r.readAsText(f, 'utf-8');
+          });
+
+          function setReaderText(txt){
+            readerContent.innerText = txt || '';
+            readerEmpty.style.display = txt ? 'none' : 'block';
+          }
+          window._readerAPI = { setText: setReaderText };
+
+          // font size control
+          readerFontSize.addEventListener('change', (e)=>{
+            readerContent.style.fontSize = e.target.value;
+          });
+
+          // notes save -> 同时下载为 本地TXT：书名-章节名-笔记.txt
+          saveNotesBtn.addEventListener('click', ()=>{
+            const text = notesTextarea.value || '';
+            // 1) 仍然保存到 localStorage（保留原有功能）
+            localStorage.setItem('readerNotes', text);
+            // 标记本次已显式保存
+            notesDirty = false; notesExplicitlySaved = true;
+            try { sessionStorage.removeItem(WARN_FLAG_KEY); } catch(_){ }
+
+            // 2) 生成文件名（当前仅支持《恶意》章节的命名；否则回退到“阅读笔记.txt”）
+            function chapterTitleForMalice(n){
+              switch(Number(n)){
+                case 1: return '卷一';
+                case 2: return '卷二';
+                case 3: return '卷三';
+                case 4: return '卷四';
+                case 5: return '卷五';
+                case 6: return '卷六';
+                case 7: return '疑惑之章 加贺恭一郎的记录';
+                case 8: return '解决之章 野野口修的手记';
+                case 9: return '求索之章 加贺恭一郎的独白';
+                case 10: return '告白之章 野野口修的手记';
+                case 11: return '过去之章（一）加贺恭一郎的记录';
+                case 12: return '据林田顺一说';
+                case 13: return '据新田治美说';
+                case 14: return '据元谷雅俊说';
+                case 15: return '据广泽智代说';
+                case 16: return '据松岛行男说';
+                case 17: return '据高桥顺次说';
+                case 18: return '据三谷宏一说';
+                case 19: return '据藤村康志说';
+                case 20: return '据中冢昭夫说';
+                case 21: return '据辻村平吉说';
+                case 22: return '过去之章（三）加贺恭一郎的回忆';
+                case 23: return '真相之章 加贺恭一郎的阐明';
+                default: return n ? `第${n}章` : '未定位章节';
+              }
+            }
+            function sanitizeFilename(name){
+              return String(name)
+                .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '') // 移除非法字符
+                .replace(/\s+/g, ' ')                          // 合并多空格
+                .trim()
+                .slice(0, 128);                                 // 控制文件名长度
+            }
+            function buildNotesFilename(){
+              // 当前 hash 若是 reading-malice-chapterN 则使用《恶意》及对应章节名
+              const cur = getCurrentMaliceChapter() || parseInt(localStorage.getItem('maliceCurrentChapter')||'', 10);
+              if (cur && cur >=1 && cur <= 23) {
+                const book = '恶意';
+                const chapterName = chapterTitleForMalice(cur);
+                return sanitizeFilename(`${book}-${chapterName}-笔记.txt`);
+              }
+              // 其他情况回退通用命名
+              return '阅读笔记.txt';
+            }
+
+            const filename = buildNotesFilename();
+            try {
+              const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(() => {
+                URL.revokeObjectURL(url);
+                a.remove();
+              }, 0);
+              // 轻量反馈
+              const old = saveNotesBtn.textContent;
+              saveNotesBtn.textContent = '已下载';
+              setTimeout(()=> saveNotesBtn.textContent = old, 1200);
+            } catch(e) {
+              // 失败则给出提示
+              alert('已保存到本地，但自动下载失败：' + (e && e.message ? e.message : e));
+            }
+          });
+
+          // collapse / expand notes
+          function collapseNotes(){
+            // remember current notes width to restore later
+            state.lastNotesWidth = notesPane.style.flexBasis || getComputedStyle(notesPane).flexBasis || '34%';
+            // hide notes pane and let reader occupy full width
+            notesPane.classList.add('notes-collapsed');
+            notesPane.style.display = 'none';
+            readerPane.style.flexBasis = '100%';
+            // show mini toggle near top-right
+            notesMiniToggle.classList.add('visible');
+            state.notesCollapsed = true;
+            persistState();
+          }
+          function expandNotes(){
+            // restore notes pane display and width
+            notesPane.classList.remove('notes-collapsed');
+            notesPane.style.display = 'flex';
+            // restore saved width or lastNotesWidth or default
+            const restore = state.notesWidth || state.lastNotesWidth || '34%';
+            notesPane.style.flexBasis = restore;
+            const nb = parseFloat(restore);
+            if (!isNaN(nb)) {
+              readerPane.style.flexBasis = `${100 - nb}%`;
+            } else {
+              readerPane.style.flexBasis = '66%';
+            }
+            notesMiniToggle.classList.remove('visible');
+            state.notesCollapsed = false;
+            persistState();
+          }
+          collapseNotesBtn.addEventListener('click', collapseNotes);
+          notesMiniToggle.addEventListener('click', expandNotes);
+
+          if (state.notesCollapsed) {
+            // start collapsed if persisted
+            collapseNotes();
+          }
+
+          // draggable divider
+          let dragging = false;
+          divider.addEventListener('mousedown', (e)=>{
+            dragging = true;
+            document.body.style.cursor = 'col-resize';
+            e.preventDefault();
+          });
+          window.addEventListener('mousemove', (e)=>{
+            if (!dragging) return;
+            const rect = splitWrap.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            // clamp
+            const minLeft = 160;
+            const minRight = 120;
+            if (x < minLeft) x = minLeft;
+            if (x > rect.width - minRight) x = rect.width - minRight;
+            const leftPct = (x/rect.width)*100;
+            const rightPct = 100 - leftPct;
+            readerPane.style.flexBasis = `${leftPct}%`;
+            notesPane.style.flexBasis = `${rightPct}%`;
+          });
+          window.addEventListener('mouseup', ()=>{
+            if (!dragging) return;
+            dragging = false;
+            document.body.style.cursor = '';
+            // persist width
+            state.notesWidth = notesPane.style.flexBasis;
+            persistState();
+          });
+          // touch support
+          divider.addEventListener('touchstart', ()=> dragging = true, {passive:true});
+          window.addEventListener('touchmove', (ev)=>{
+            if (!dragging) return;
+            const touch = ev.touches[0];
+            const rect = splitWrap.getBoundingClientRect();
+            let x = touch.clientX - rect.left;
+            const minLeft = 160;
+            const minRight = 120;
+            if (x < minLeft) x = minLeft;
+            if (x > rect.width - minRight) x = rect.width - minRight;
+            const leftPct = (x/rect.width)*100;
+            const rightPct = 100 - leftPct;
+            readerPane.style.flexBasis = `${leftPct}%`;
+            notesPane.style.flexBasis = `${rightPct}%`;
+          }, {passive:true});
+          window.addEventListener('touchend', ()=>{
+            if (!dragging) return;
+            dragging = false;
+            state.notesWidth = notesPane.style.flexBasis;
+            persistState();
+          });
+
+          function persistState(){
+            localStorage.setItem('readingState', JSON.stringify(state));
+          }
+
+          // when user navigates to #section-reading, focus/scroll reader
+          if (location.hash && location.hash.includes('section-reading')) {
+            setTimeout(()=> {
+              readerPane.scrollIntoView({behavior:'smooth', block:'start'});
+            }, 120);
+          }
+
+          // keyboard shortcut: Ctrl+S to save notes
+          window.addEventListener('keydown', (e)=>{
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+              e.preventDefault();
+              localStorage.setItem('readerNotes', notesTextarea.value);
+              saveNotesBtn.textContent = '已保存';
+              setTimeout(()=> saveNotesBtn.textContent = '保存', 900);
+            }
+          });
+
+          // ========== 划词复制到笔记 ==========
+          function isSelectionInReader(){
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return false;
+            const range = sel.getRangeAt(0);
+            const container = range.commonAncestorContainer;
+            return readerContent.contains(container);
+          }
+          function getSelectedText(){
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0) return '';
+            return sel.toString();
+          }
+          function positionCopyButton(){
+            try {
+              const sel = window.getSelection();
+              if (!sel || sel.rangeCount === 0 || sel.isCollapsed) { hideCopyButton(); return; }
+              const range = sel.getRangeAt(0);
+              const rect = range.getBoundingClientRect();
+              if (!rect || (!rect.width && !rect.height)) { hideCopyButton(); return; }
+              // 放在选择区域右上角，略向外偏移
+              const btnSize = 34;
+              const padding = 6;
+              let top = rect.top - btnSize - 4; // 上方
+              let left = rect.right - btnSize + padding; // 右侧略偏
+              // 视口内安全范围
+              const minTop = 6, minLeft = 6;
+              const maxLeft = window.innerWidth - btnSize - 6;
+              const maxTop  = window.innerHeight - btnSize - 6;
+              if (top < minTop) top = rect.top + 2; // 若空间不足，改放在区域内上边
+              if (left < minLeft) left = minLeft;
+              if (left > maxLeft) left = maxLeft;
+              if (top > maxTop) top = maxTop;
+              selectionCopyBtn.style.left = left + 'px';
+              selectionCopyBtn.style.top  = top + 'px';
+              selectionCopyBtn.style.display = 'flex';
+            } catch(e) {
+              hideCopyButton();
+            }
+          }
+          function hideCopyButton(){
+            selectionCopyBtn.style.display = 'none';
+          }
+
+          function appendToNotes(text){
+            if (!text) return;
+            const trimmed = text.replace(/\s+$/,'').replace(/^\s+/,'');
+            if (!trimmed) return;
+            const cur = notesTextarea.value;
+            const prefix = cur && !cur.endsWith('\n') ? '\n' : '';
+            const stamp = new Date();
+            const timeStr = `${stamp.getHours().toString().padStart(2,'0')}:${stamp.getMinutes().toString().padStart(2,'0')}`;
+            const toAdd = `${prefix}> 引用（${timeStr}）\n${trimmed}\n`;
+            notesTextarea.value = cur + toAdd;
+            // 将光标移至末尾
+            notesTextarea.focus();
+            try { notesTextarea.selectionStart = notesTextarea.selectionEnd = notesTextarea.value.length; } catch(_){}
+            // 顺便同步一下本地存储（轻量）
+            localStorage.setItem('readerNotes', notesTextarea.value);
+            schedulePreview();
+            notesDirty = true; notesExplicitlySaved = false;
+          }
+
+          // 绑定事件：仅在阅读区域内有效
+          readerContent.addEventListener('mouseup', () => {
+            setTimeout(() => {
+              if (isSelectionInReader()) positionCopyButton(); else hideCopyButton();
+            }, 0);
+          });
+          readerContent.addEventListener('keyup', (e) => {
+            // 键盘选择（Shift+方向键）
+            if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+              if (isSelectionInReader()) positionCopyButton(); else hideCopyButton();
+            }
+          });
+          readerContent.addEventListener('scroll', hideCopyButton);
+          window.addEventListener('scroll', hideCopyButton);
+          window.addEventListener('resize', hideCopyButton);
+          document.addEventListener('mousedown', (e)=>{
+            // 点击其他位置时隐藏（但点在按钮本身例外）
+            if (e.target !== selectionCopyBtn) hideCopyButton();
+          });
+
+          selectionCopyBtn.addEventListener('click', () => {
+            const txt = getSelectedText();
+            appendToNotes(txt);
+            hideCopyButton();
+            // 轻反馈：闪烁按钮文本
+            const old = selectionCopyBtn.textContent;
+            selectionCopyBtn.textContent = '✓';
+            setTimeout(()=> selectionCopyBtn.textContent = old, 500);
+          });
+
+          // ========== 快捷笔记：插入模板 ==========
+          function insertAtCursor(text){
+            const ta = notesTextarea;
+            const start = ta.selectionStart || 0;
+            const end = ta.selectionEnd || start;
+            const before = ta.value.slice(0, start);
+            const after = ta.value.slice(end);
+            ta.value = before + text + after;
+            const pos = before.length + text.length;
+            try { ta.selectionStart = ta.selectionEnd = pos; } catch(_){ }
+            ta.focus();
+            localStorage.setItem('readerNotes', ta.value);
+            schedulePreview();
+            notesDirty = true; notesExplicitlySaved = false;
+          }
+
+          function needsSeparatorBeforeInsertion(){
+            const ta = notesTextarea;
+            if (!ta.value || ta.value.trim().length === 0) return false;
+            const start = ta.selectionStart || 0;
+            // 在非开头位置插入，且前面不是以换行或====结束时，添加分割
+            const before = ta.value.slice(0, start);
+            const trimmedEnd = before.replace(/[\s\S]*\n?([\s\S]*)$/, '$1');
+            // 如果前一行不是分割线
+            if (!before.endsWith('\n') && before.length>0) return true;
+            // Markdown 水平分割线：--- 或 *** 或 ___
+            const hrRe = /(^|\n)\s{0,3}((?:-{3,})|(?:\*{3,})|(?:_{3,}))\s*$/;
+            if (!hrRe.test(before)) return true;
+            return false;
+          }
+
+          function ensureSeparatorPrefix(){
+            const ta = notesTextarea;
+            const start = ta.selectionStart || 0;
+            // 如果在首行且文本为空，不加分隔
+            if (!ta.value || ta.value.trim().length === 0) return '';
+            // 总是添加一条分隔线，前面如果没有换行则补一个换行
+            const before = ta.value.slice(0, start);
+            const needLeadingNewline = before.length>0 && !before.endsWith('\n');
+            return (needLeadingNewline ? '\n' : '') + '---\n';
+          }
+
+          function buildSettingsTable(){
+            return '设定集\n\n| 角色 | 设定 |\n| --- | --- |\n|  |  |\n|  |  |\n|  |  |\n\n';
+          }
+
+          function buildOutline(){
+            // 插入一个不显眼的浅灰色提示（预览中呈现），编辑时可删除
+            const hint = '<div class="md-hint">提示：每行以“ - 空格 ”开头即可生成一条大纲项；若本行只有“ - ”再按回车即可结束列表。（此提示可删除）</div>';
+            return '大纲总结\n' + hint + '\n- ';
+          }
+
+          function openQuickNotesMenu(){
+            const rect = quickNotesBtn.getBoundingClientRect();
+            quickNotesMenu.style.left = (rect.left) + 'px';
+            quickNotesMenu.style.top  = (rect.bottom + 6) + 'px';
+            quickNotesMenu.style.display = 'block';
+          }
+          function closeQuickNotesMenu(){ quickNotesMenu.style.display = 'none'; }
+
+          quickNotesBtn.addEventListener('click', (e)=>{
+            e.stopPropagation();
+            if (quickNotesMenu.style.display === 'block') closeQuickNotesMenu();
+            else openQuickNotesMenu();
+          });
+          document.addEventListener('click', (e)=>{
+            if (!quickNotesMenu.contains(e.target) && e.target !== quickNotesBtn) closeQuickNotesMenu();
+          });
+          window.addEventListener('scroll', closeQuickNotesMenu);
+          window.addEventListener('resize', closeQuickNotesMenu);
+
+          quickNotesMenu.addEventListener('click', (e)=>{
+            const t = e.target;
+            if (!(t instanceof Element)) return;
+            const type = t.getAttribute('data-type');
+            if (!type) return;
+            // 组装插入文本
+            let block = '';
+            if (type === 'settings') block = buildSettingsTable();
+            else if (type === 'outline') block = buildOutline();
+            if (!block) return;
+            // 分割线
+            const prefix = ensureSeparatorPrefix();
+            insertAtCursor(prefix + block);
+            closeQuickNotesMenu();
+          });
+
+          // ========== 大纲模式：回车自动续行（bulleted list） ==========
+          notesTextarea.addEventListener('keydown', function(e){
+            if (e.key !== 'Enter') return;
+            const ta = notesTextarea;
+            const start = ta.selectionStart || 0;
+            const end = ta.selectionEnd || start;
+            if (start !== end) return; // 选择范围时不处理
+            const val = ta.value;
+            const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+            const line = val.slice(lineStart, start);
+            const bulletPrefixMatch = line.match(/^\s*([-*•])\s+/);
+            if (!bulletPrefixMatch) return; // 非项目符号行
+            e.preventDefault();
+            const contentAfterBullet = line.replace(/^\s*([-*•])\s+/, '').trim();
+            const before = val.slice(0, start);
+            const after  = val.slice(end);
+            if (contentAfterBullet.length === 0) {
+              // 当前行只有项目符号 -> 结束列表：把这一行的符号去掉并换行
+              const beforeLine = val.slice(0, lineStart);
+              const afterLine  = val.slice(start); // 从光标处之后
+              ta.value = beforeLine + '\n' + afterLine;
+              const newPos = beforeLine.length + 1; // 换行后位置
+              try { ta.selectionStart = ta.selectionEnd = newPos; } catch(_){ }
+            } else {
+              // 续行新条目
+              const insert = '\n- ';
+              ta.value = before + insert + after;
+              const newPos = before.length + insert.length;
+              try { ta.selectionStart = ta.selectionEnd = newPos; } catch(_){ }
+            }
+            // 持久化
+            localStorage.setItem('readerNotes', ta.value);
+            schedulePreview();
+            notesDirty = true; notesExplicitlySaved = false;
+          });
+          // ========== Markdown 预览渲染 & 模式切换 ==========
+          function mdRender(text){
+            try {
+              if (window.marked && typeof window.marked.parse === 'function') {
+                return window.marked.parse(text || '');
+              }
+            } catch(e){}
+            // fallback
+            const esc = (text||'').replace(/[&<>"]+/g,'');
+            return '<pre style="white-space:pre-wrap;">'+esc+'</pre>';
+          }
+          function renderNotesPreview(){
+            notesPreview.innerHTML = mdRender(notesTextarea.value);
+          }
+          let previewTimer = null;
+          function schedulePreview(){
+            if (previewTimer) clearTimeout(previewTimer);
+            previewTimer = setTimeout(renderNotesPreview, 160);
+          }
+          notesTextarea.addEventListener('input', ()=>{
+            localStorage.setItem('readerNotes', notesTextarea.value);
+            schedulePreview();
+            notesDirty = true; notesExplicitlySaved = false;
+          });
+          function setNotesViewMode(mode){
+            const modes = ['edit','preview','split'];
+            modes.forEach(m=> notesAreaEl.classList.remove('view-'+m));
+            if(!modes.includes(mode)) mode='edit';
+            notesAreaEl.classList.add('view-'+mode);
+            [notesModeEditBtn, notesModePreviewBtn, notesModeSplitBtn].forEach(btn=> btn && (btn.style.opacity = 0.6));
+            if(mode==='edit') notesModeEditBtn.style.opacity=1;
+            if(mode==='preview') notesModePreviewBtn.style.opacity=1;
+            if(mode==='split') notesModeSplitBtn.style.opacity=1;
+            localStorage.setItem('notesViewMode', mode);
+            if(mode!=='edit') renderNotesPreview();
+          }
+          notesModeEditBtn.addEventListener('click', ()=> setNotesViewMode('edit'));
+          notesModePreviewBtn.addEventListener('click', ()=> setNotesViewMode('preview'));
+          notesModeSplitBtn.addEventListener('click', ()=> setNotesViewMode('split'));
+          setNotesViewMode(localStorage.getItem('notesViewMode') || 'edit');
+          schedulePreview();
+          // ========== 刷新/跳转保护：首次提醒，二次清空 ==========
+          function hasUnsavedNotes(){
+            return (notesTextarea.value.trim().length>0) && (notesDirty || !notesExplicitlySaved);
+          }
+          function clearNotes(){
+            notesTextarea.value = '';
+            try { localStorage.removeItem('readerNotes'); } catch(_){}
+            notesDirty = false; notesExplicitlySaved = true;
+            schedulePreview();
+          }
+          function showTransientBanner(msg){
+            // Inject animation styles once
+            let styleEl = document.getElementById('notes-exit-banner-style');
+            if(!styleEl){
+              styleEl = document.createElement('style');
+              styleEl.id = 'notes-exit-banner-style';
+              styleEl.textContent = `
+                @keyframes nxb-slide { from { transform: translate(-50%, -12px) scale(.98); opacity: 0; } to { transform: translate(-50%, 0) scale(1); opacity: 1; } }
+                @keyframes nxb-pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 143, 31, .65); } 70% { box-shadow: 0 0 0 14px rgba(255, 143, 31, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 143, 31, 0); } }
+              `;
+              document.head.appendChild(styleEl);
+            }
+            let el = document.getElementById('notes-exit-banner');
+            if(!el){
+              el = document.createElement('div');
+              el.id = 'notes-exit-banner';
+              document.body.appendChild(el);
+            }
+            el.setAttribute('role', 'alert');
+            el.setAttribute('aria-live', 'assertive');
+            el.style.cssText = [
+              'position:fixed',
+              'left:50%','top:24px','transform:translateX(-50%)',
+              'background:#fff7e6','color:#592d00',
+              'padding:12px 14px','border-radius:12px','border:2px solid #ff8f1f',
+              'font-size:1rem','font-weight:600',
+              'z-index:2600','box-shadow:0 10px 28px rgba(0,0,0,.28)',
+              'display:flex','align-items:center','gap:12px',
+              'animation:nxb-slide .22s ease-out, nxb-pulse 1.6s ease-out 1'
+            ].join(';') + ';';
+            el.innerHTML = `
+              <span aria-hidden="true" style="font-size:1.2rem;line-height:1">⚠️</span>
+              <span>${msg}</span>
+              <span style="flex:1"></span>
+              <button id="nxb-save" style="background:#ff8f1f;color:#1b1b1b;border:none;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer;">立即保存</button>
+              <button id="nxb-close" style="background:transparent;color:#592d00;border:1px solid rgba(89,45,0,.3);padding:7px 10px;border-radius:8px;cursor:pointer;">关闭</button>
+            `;
+            const hide = () => {
+              el.style.transition = 'opacity .8s, transform .8s';
+              el.style.opacity = '0';
+              el.style.transform = 'translateX(-50%) translateY(-8px)';
+              setTimeout(()=>{ if(el && el.parentNode) el.parentNode.removeChild(el); }, 820);
+            };
+            const saveBtn = el.querySelector('#nxb-save');
+            const closeBtn = el.querySelector('#nxb-close');
+            if(saveBtn){
+              saveBtn.addEventListener('click', () => {
+                try {
+                  const s = document.getElementById('saveNotesBtn');
+                  if (s) {
+                    if (typeof (s).click === 'function') (s).click();
+                    else s.dispatchEvent(new Event('click'));
+                  }
+                } catch(_){ }
+                hide();
+              }, { once:true });
+            }
+            if(closeBtn){
+              closeBtn.addEventListener('click', () => hide(), { once:true });
+            }
+            el.style.opacity = '1';
+            try { if (el._hideTimer) clearTimeout(el._hideTimer); } catch(_){}
+            el._hideTimer = setTimeout(hide, 4600);
+          }
+          function guardAction(run){
+            if(!hasUnsavedNotes()){ run(); return; }
+            let warned = false;
+            try { warned = !!sessionStorage.getItem(WARN_FLAG_KEY); } catch(_){}
+            if(!warned){
+              try { sessionStorage.setItem(WARN_FLAG_KEY,'1'); } catch(_){}
+              showTransientBanner('笔记尚未保存：已阻止跳转/刷新，再次操作将清空笔记并继续。');
+              return;
+            }
+            clearNotes();
+            try { sessionStorage.removeItem(WARN_FLAG_KEY); } catch(_){}
+            run();
+          }
+          // 暴露给全局导航（菜单/首页等）使用
+          window.guardNotesNav = guardAction;
+          // 刷新/关闭浏览器时的提示与清空
+          window.addEventListener('beforeunload', (e)=>{
+            if(!hasUnsavedNotes()) return; // allow
+            let warned = false;
+            try { warned = !!sessionStorage.getItem(WARN_FLAG_KEY); } catch(_){}
+            if(!warned){
+              try { sessionStorage.setItem(WARN_FLAG_KEY,'1'); } catch(_){}
+              e.preventDefault();
+              e.returnValue = '笔记尚未保存，刷新或离开将丢失（再次刷新将清空）';
+            } else {
+              clearNotes();
+            }
+          });
+          // === 章节导航按钮逻辑补全 ===
+          function getCurrentChapter(){
+            const h = (location.hash || '').slice(1);
+            let m = h.match(/^reading-malice-chapter(\d{1,2})$/);
+            if(m){
+              const n = parseInt(m[1],10);
+              return { book:'malice', chapter: (n >=1 && n<=23) ? n : null };
+            }
+            m = h.match(/^reading-and_then_there_were_none-chapter(\d{1,2})$/);
+            if(m){
+              const n = parseInt(m[1],10);
+              return { book:'and_then_there_were_none', chapter: (n >=1 && n<=16) ? n : null };
+            }
+            return null;
+          }
+
+          function refreshChapterButtons(){
+            const info = getCurrentChapter();
+            if(info && info.chapter){
+              const max = info.book === 'malice' ? 23 : (info.book === 'and_then_there_were_none' ? 16 : 0);
+              nextChapterBtn.disabled = (info.chapter >= max);
+              nextChapterBtn.style.opacity = (info.chapter >= max) ? '.45' : '1';
+              backDirectoryBtn.style.display = 'inline-block';
+              nextChapterBtn.style.display = 'inline-block';
+            } else {
+              backDirectoryBtn.style.display = 'none';
+              nextChapterBtn.style.display = 'none';
+            }
+          }
+
+          // 暴露给全局脚本（loadRemoteChapter 成功时调用）
+          window.refreshChapterButtons = refreshChapterButtons;
+
+          backDirectoryBtn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            const info = getCurrentChapter();
+            const detailPage = info && info.book === 'and_then_there_were_none' ? 'and_then_there_were_none.html' : 'malice.html';
+            guardAction(() => { location.href = detailPage; });
+          });
+
+            // 强制刷新 ensuring reading section visible before jump
+          nextChapterBtn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            guardAction(() => {
+              const info = getCurrentChapter();
+              if(!info || !info.chapter) return;
+              const max = info.book === 'malice' ? 23 : (info.book === 'and_then_there_were_none' ? 16 : 0);
+              if(info.chapter >= max) return;
+              const nxt = info.chapter + 1;
+              location.hash = '#reading-' + info.book + '-chapter' + nxt;
+              if (typeof loadRemoteChapter === 'function') {
+                loadRemoteChapter(info.book, nxt);
+              }
+            });
+          });
+
+          // 初始与监听
+          refreshChapterButtons();
+          window.addEventListener('hashchange', refreshChapterButtons);
+        })();
+      </script>
+    </section>
+
+    <!-- 关于区 -->
+    <section class="section" id="section-about">
+      <div class="about-text">
+        <h2 style="color:#ffe5b7; font-family:var(--text-typer);font-weight:600;">关于 Chapter Café</h2>
+        <p>Chapter Café 是一个以「阅读如品咖啡」为理念的沉浸式小说阅读网站。在这里，每一本小说都像一杯咖啡，待你细细品味；每一个章节，都是一段独特的风味旅程。</p>
+        <ul>
+          <li><b>视觉：</b> 夜晚咖啡馆的色调与灯光，细腻柔光、仿木纹元素，以及轻柔的蒸汽动态。</li>
+          <li><b>体验：</b> 响应式设计，适配移动端与大屏，伴有舒适的淡入淡出动画和卡片光影动效。</li>
+          <li><b>理念：</b> 故事，是另一种形式的咖啡因，让灵魂与想象自由徜徉。</li>
+        </ul>
+        <p style="color:#a6d3ff;">作者：上海大学 大一 理学工学Ⅲ类（电子信息类—） 吴贝恩  </p>
+      </div>
+    </section>
+  </main>
+  <!-- ====== AI咖啡豆 Bean 按钮&聊天 ========= -->
+  <div class="bean-fab" id="beanFab" title="和Bean聊聊">
+    <img src="bean1.png" alt="Bean" class="bean-emoji" />
+  </div>
+  <div id="bean-chat">
+    <div class="bean-chat-header">☕️ Bean - AI 咖啡豆陪伴</div>
+    <div class="bean-chat-messages" id="beanMessages">
+      <div>晚上好！这里是Bean，有什么想聊的故事或咖啡推荐吗？（理想中是做一个智能体来回答读者关于小说的问题）</div>
+    </div>
+    <form class="bean-chat-input-area" autocomplete="off">
+      <input class="bean-chat-input" id="beanInput" placeholder="说点什么吧…" maxlength="100"/>
+      <button class="bean-chat-send" type="submit" title="发送">➤</button>
+    </form>
+  </div>
+  <!-- 引入 marked.js Markdown 渲染库 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- ====== 页脚 ====== -->
+  <footer>
+    <div>故事，是另一种形式的咖啡因。</div>
+    <div class="footer-social">
+      <a href="#" title="微博" aria-label="微博">🌐</a>
+      <a href="#" title="知乎" aria-label="知乎">📝</a>
+      <a href="#" title="网易云" aria-label="网易云">🎵</a>
+      <a href="#" title="邮箱" aria-label="邮箱">📧</a>
+    </div>
+    <div class="footer-copyright">
+      © 2025 Chapter Café · Powered by Story and Coffee.
+    </div>
+  </footer>
+  <!-- ========= 脚本交互区 ========= -->
+  <script>
+  // ========= 导航菜单栏&折叠菜单 =========
+  const nav = document.getElementById('mainNav');
+  const hamburger = document.getElementById('navHamburger');
+  hamburger.addEventListener('click', () => {
+    nav.classList.toggle('open');
+  });
+  // 关闭折叠菜单(移动端) - 点击nav外部
+  window.addEventListener('click', e => {
+    if(window.innerWidth <= 900){
+      if (!nav.contains(e.target) && !hamburger.contains(e.target)) nav.classList.remove('open');
+    }
+  });
+
+  // ========= 页面切换 & 历史记录管理（支持浏览器前进/后退） =========
+  const sections = {
+    home: document.getElementById('section-home'),
+    menu: document.getElementById('section-menu'),
+    reading: document.getElementById('section-reading'),
+    about: document.getElementById('section-about')
+  };
+  const navLinks = Array.from(document.querySelectorAll('.nav-link'));
+
+  // 仅负责更新 DOM / 样式（不触发 history）
+  function showSection(section) {
+    for (let key in sections) {
+      if (key === section) {
+        sections[key].classList.add('active');
+        setTimeout(()=>sections[key].scrollIntoView({behavior:'smooth', block:'start'}),80);
+      } else {
+        sections[key].classList.remove('active');
+      }
+    }
+    navLinks.forEach(link => {
+      if (link.dataset.section === section) link.classList.add('active');
+      else link.classList.remove('active');
+    });
+    // 关闭移动端折叠菜单
+    nav.classList.remove('open');
+  }
+
+  // 导航动作：更新界面并写入 history（replace 可用于初始）
+  function navigateTo(section, replace = false) {
+    showSection(section);
+    const url = '#' + section;
+    const state = { section };
+    try {
+      if (replace) history.replaceState(state, '', url);
+      else history.pushState(state, '', url);
+    } catch (e) {
+      // 某些极端环境下 pushState 可能失败，忽略以保证不抛异常
+    }
+  }
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const run = () => navigateTo(link.dataset.section);
+      if (window.guardNotesNav) window.guardNotesNav(run); else run();
+    });
+  });
+
+  // ========== 新增：menu 子导航（使用 coffee-card 直接导航） ==========
+  // 保留 scrollToMenuAnchor 函数（如果已有则用现成版本），这里只绑定事件：
+  function scrollToMenuAnchor(targetId, push = true) {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    showSection('menu');
+    setTimeout(() => {
+      // 更改 scrollIntoView 调用以在水平方向居中
+      el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'center' });
+      el.focus({preventScroll:true});
+    }, 120);
+    if (push) {
+      try { history.pushState({ section: 'menu', sub: targetId }, '', '#' + targetId); } catch (e) {}
+    }
+  }
+
+  // 将 coffee-card 作为导航（支持点击和回车/空格键）
+  const coffeeCardsNav = Array.from(document.querySelectorAll('#section-menu .coffee-card[data-target]'));
+  coffeeCardsNav.forEach(card => {
+    const tgt = card.dataset.target;
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!tgt) return;
+      const run = () => scrollToMenuAnchor(tgt, true);
+      if (window.guardNotesNav) window.guardNotesNav(run); else run();
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (!tgt) return;
+        const run = () => scrollToMenuAnchor(tgt, true);
+        if (window.guardNotesNav) window.guardNotesNav(run); else run();
+      }
+    });
+  });
+
+  // 首页“Enter the Café”按钮 → 菜单（保留原有视觉动画，完成后导航并写入历史）
+  const enterBtn = document.getElementById('enterBtn');
+  if (enterBtn) {
+    enterBtn.addEventListener('click', () => {
+      const home = sections['home'];
+      home.style.transition = "opacity 0.7s, filter 0.7s";
+      home.style.opacity = 0;
+      home.style.filter = "blur(24px)";
+      const run = () => {
+        setTimeout(() => {
+          // 通过 navigateTo 推入历史记录
+          navigateTo('menu');
+          home.style.display = 'none';
+          setTimeout(() => { // 为返回首页恢复可视化
+            home.style.opacity = 1;
+            home.style.filter = 'none';
+            home.style.display = '';
+          }, 700);
+        }, 700);
+      };
+      if (window.guardNotesNav) window.guardNotesNav(run); else run();
+    });
+  }
+
+  // 如果页面中存在回到首页的按钮则绑定（兼容原代码）
+  const backToHomeBtn = document.getElementById('backToHomeBtn');
+  if (backToHomeBtn) {
+    backToHomeBtn.addEventListener('click', () => {
+      const run = () => navigateTo('home');
+      if (window.guardNotesNav) window.guardNotesNav(run); else run();
+    });
+  }
+
+  // 页面加载时：根据 hash 恢复对应板块或子锚点（并用 replaceState 建立初始 state）
+  window.addEventListener('load', () => {
+    const rawHash = (location.hash && location.hash.slice(1)) || '';
+    const chapterParsed = parseReadingChapter(rawHash);
+    if (chapterParsed) {
+      console.log('[Init] Detected chapter hash:', rawHash);
+      try {
+        history.replaceState({ section:'reading', book:chapterParsed.book, chapter:chapterParsed.chapter }, '', '#' + rawHash);
+      } catch(e){}
+      loadRemoteChapter(chapterParsed.book, chapterParsed.chapter);
+      return;
+    }
+    if (rawHash.startsWith('menu-')) {
+      const sub = rawHash;
+      try { history.replaceState({ section: 'menu', sub }, '', '#' + sub); } catch (e) {}
+      showSection('menu');
+      setTimeout(()=> {
+        const el = document.getElementById(sub);
+        if (el) el.scrollIntoView({behavior:'auto', block:'start'});
+      }, 120);
+      return;
+    }
+    const initial = rawHash || 'home';
+    try { history.replaceState({ section: initial }, '', '#' + initial); } catch (e) {}
+    // 如果 initial 不是合法 section，强制回到 home
+    if(!sections[initial]) {
+      showSection('home');
+    } else {
+      showSection(initial);
+    }
+  });
+
+  // hashchange 加强：支持直接输入章节 hash
+  window.addEventListener('hashchange', () => {
+    const hash = (location.hash || '').slice(1);
+    const parsed = parseReadingChapter(hash);
+    if(parsed){
+      console.log('[Hashchange] Chapter:', parsed);
+      loadRemoteChapter(parsed.book, parsed.chapter);
+      return;
+    }
+  });
+
+  // ====== 远程章节加载：恶意 / 无人生还 ======
+    const MALICE_BASES = [
+    'https://raw.githubusercontent.com/vany0821/fiction-reading-page/main/malice/',
+    'https://raw.githubusercontent.com/vany0821/fiction-reading-page/20cac8b3dadddeafee7ca1444b55834cd0d6bc88/malice/',
+    'https://cdn.jsdelivr.net/gh/vany0821/fiction-reading-page@main/malice/'
+  ];
+  const ATTWN_BASES = [
+    'https://raw.githubusercontent.com/vany0821/fiction-reading-page/main/and_then_there_were_none/',
+    'https://raw.githubusercontent.com/vany0821/fiction-reading-page/20cac8b3dadddeafee7ca1444b55834cd0d6bc88/and_then_there_were_none/',
+    'https://cdn.jsdelivr.net/gh/vany0821/fiction-reading-page@main/and_then_there_were_none/'
+  ];
+  
+  function parseReadingChapter(hashStr){
+    if(!hashStr) return null;
+    let m = hashStr.match(/^reading-malice-chapter(\d{1,2})$/);
+    if(m){
+      const num = parseInt(m[1],10);
+      if(num >= 1 && num <= 23) return { book:'malice', chapter:num };
+      return null;
+    }
+    m = hashStr.match(/^reading-and_then_there_were_none-chapter(\d{1,2})$/);
+    if(m){
+      const num = parseInt(m[1],10);
+      if(num >= 1 && num <= 16) return { book:'and_then_there_were_none', chapter:num };
+      return null;
+    }
+    return null;
+  }
+
+  async function loadRemoteChapter(book, chapterNum){
+    showSection('reading');
+
+    const el = document.getElementById('readerContent');
+    const empty = document.getElementById('readerEmpty');
+    if (el) {
+      el.innerText = '正在加载章节 ' + chapterNum + ' ...';
+      if (empty) empty.style.display = 'none';
+    }
+
+    const cfg = (function(){
+      if (book === 'malice') return { bases: MALICE_BASES, max: 23, storeKey: 'maliceCurrentChapter', detail: 'malice.html' };
+      if (book === 'and_then_there_were_none') return { bases: ATTWN_BASES, max: 16, storeKey: 'attwnCurrentChapter', detail: 'and_then_there_were_none.html' };
+      return null;
+    })();
+    if(!cfg){
+      window._readerAPI && window._readerAPI.setText('暂不支持的书籍：' + (book||''));
+      return;
+    }
+
+    const name = `chapter${chapterNum}.txt`;
+    const tried = [];
+    for (const base of cfg.bases) {
+      const url = base + name;
+      tried.push(url);
+      try {
+        const resp = await fetch(url, { cache: 'no-store' });
+        if (resp.ok) {
+          const txt = await resp.text();
+          window._readerAPI && window._readerAPI.setText(txt);
+          if (typeof refreshChapterButtons === 'function') refreshChapterButtons();
+          try { localStorage.setItem(cfg.storeKey, String(chapterNum)); } catch(_){ }
+          console.log('[Reading] Loaded:', url, 'length=', txt.length);
+          return;
+        }
+      } catch (e) {
+        // try next base
+      }
+    }
+    const msg = '加载失败：未找到章节文件。\n已尝试：\n- ' + tried.join('\n- ');
+    console.error('[Reading] All urls failed', tried);
+    window._readerAPI && window._readerAPI.setText(msg);
+  }
+
+  function navigateToReadingChapter(book, chapter){
+    const newHash = `reading-${book}-chapter${chapter}`;
+    try {
+      history.pushState({ section:'reading', book, chapter }, '', '#'+newHash);
+    } catch(e){ }
+    loadRemoteChapter(book, chapter);
+  }
+
+  // 初始加载（替换原 load 监听实现）
+  window.addEventListener('load', () => {
+    const rawHash = (location.hash && location.hash.slice(1)) || '';
+    const chapterParsed = parseReadingChapter(rawHash);
+    if (chapterParsed) {
+      console.log('[Init] Detected chapter hash:', rawHash);
+      try {
+        history.replaceState({ section:'reading', book:chapterParsed.book, chapter:chapterParsed.chapter }, '', '#' + rawHash);
+      } catch(e){}
+      loadRemoteChapter(chapterParsed.book, chapterParsed.chapter);
+      return;
+    }
+    if (rawHash.startsWith('menu-')) {
+      const sub = rawHash;
+      try { history.replaceState({ section: 'menu', sub }, '', '#' + sub); } catch (e) {}
+      showSection('menu');
+      setTimeout(()=> {
+        const el = document.getElementById(sub);
+        if (el) el.scrollIntoView({behavior:'auto', block:'start'});
+      }, 120);
+      return;
+    }
+    const initial = rawHash || 'home';
+    try { history.replaceState({ section: initial }, '', '#' + initial); } catch (e) {}
+    // 如果 initial 不是合法 section，强制回到 home
+    if(!sections[initial]) {
+      showSection('home');
+    } else {
+      showSection(initial);
+    }
+  });
+
+  // popstate 扩展
+  window.addEventListener('popstate', (e) => {
+    const st = e.state || {};
+    if(st.section === 'reading' && st.book && st.chapter){
+      showSection('reading');
+      loadRemoteChapter(st.book, st.chapter);
+      return;
+    }
+    const hashParsed = parseReadingChapter((location.hash||'').slice(1));
+    if(hashParsed){
+      showSection('reading');
+      loadRemoteChapter(hashParsed.book, hashParsed.chapter);
+      return;
+    }
+  });
+
+  // 若用户已经在 reading 且本地存有上次章节，可提供快捷恢复（非强制）
+  window.addEventListener('DOMContentLoaded', () => {
+    if(location.hash.startsWith('#reading') && !parseReadingChapter(location.hash.slice(1))){
+      const lastChap = localStorage.getItem('maliceCurrentChapter');
+      if(lastChap){
+        // 不改变 hash（避免干扰用户），仅提示
+        const metaDiv = document.getElementById('readerContent');
+        if(metaDiv && metaDiv.textContent.trim()===''){
+          loadRemoteChapter('malice', lastChap);
+        }
+      }
+    }
+  });
+    // ========== 咖啡卡片区域响应式蒸汽隐藏 ==========
+  function updateSteamVisibility() {
+    const steams = document.querySelectorAll('.steam');
+    if(window.innerWidth <= 650){
+      steams.forEach(s=>s.style.display='none');
+    } else {
+      steams.forEach(s=>s.style.display='flex');
+    }
+  }
+  window.addEventListener('resize', updateSteamVisibility);
+  updateSteamVisibility();
+
+  // ========= AI咖啡豆 Bean 聊天交互 Placeholder =========
+  const beanFab = document.getElementById('beanFab');
+  const beanChat = document.getElementById('bean-chat');
+  const beanInput = document.getElementById('beanInput');
+  const beanMessages = document.getElementById('beanMessages');
+  beanFab.addEventListener('click', function(){
+    beanChat.classList.toggle('active');
+    setTimeout(()=> {
+      if(beanChat.classList.contains('active')) beanInput.focus();
+    }, 100);
+  });
+  const beanForm = beanChat.querySelector('form');
+  if (beanForm) {
+    beanForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      const msg = beanInput.value.trim();
+      if(msg.length === 0) return;
+      addBeanMessage(msg, false);
+      setTimeout(()=>{
+        addBeanMessage(randomReply(), true);
+      }, 900 + Math.random()*500);
+      beanInput.value = '';
+    });
+  }
+  function addBeanMessage(text, isBean){
+    const div = document.createElement('div');
+    div.style.margin = '6px 0';
+    div.style.textAlign = isBean ? 'left' : 'right';
+    div.innerHTML = isBean ?
+      `<span style="color:#ffbe76;">Bean：</span><span>${escapeHTML(text)}</span>` :
+      `<span style="color:#7adaff;">你：</span><span>${escapeHTML(text)}</span>`;
+    beanMessages.appendChild(div);
+    beanMessages.scrollTop = beanMessages.scrollHeight;
+  }
+  function randomReply(){
+    const replies = [
+      '每一杯咖啡都有故事，你更喜欢哪种香气的小说？',
+      '今晚想读取哪种类型的故事？',
+      '故事余韵，仿佛咖啡在唇齿间回荡。',
+      '我能陪你一起读下去～',
+      '对咖啡或阅读有困惑？Bean在！',
+      '你可以点菜单卡片体验不同风味哦。'
+    ];
+    return replies[Math.floor(Math.random() * replies.length)];
+  }
+  function escapeHTML(str){
+    return (str+'').replace(/[<>&"']/g, s=>(
+      {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;','\'':'&#39;'}[s]
+    ));
+  }
+  // 关闭Bean聊天窗 - 点外部或ESC
+  window.addEventListener('click', function(e){
+    if(beanChat.classList.contains('active')) {
+      if(!beanChat.contains(e.target) && !beanFab.contains(e.target)){
+        beanChat.classList.remove('active');
+      }
+    }
+  });
+  window.addEventListener('keydown', function(e){
+    if(e.key==="Escape" && beanChat.classList.contains('active')){
+      beanChat.classList.remove('active');
+    }
+  });
+
+  // ========== 柔和灯光背景动态 ==========
+  let tick=0;
+  setInterval(()=>{
+    document.body.style.backgroundPosition =
+      (62+8*Math.sin(tick/95))+"% "+(51+3*Math.cos(tick/105))+"%";
+    tick++;
+  }, 170);
+  </script>
+</body>
+</html>
+
+
